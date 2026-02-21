@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Edit|MultiEdit|Write",
+      "hooks": [{
+        "command": "npx prettier --write $FILE 2>/dev/null; npx eslint --fix $FILE 2>/dev/null; true"
+      }]
+    }]
+  }
+}
