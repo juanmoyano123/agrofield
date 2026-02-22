@@ -6,13 +6,15 @@ import { Input } from '../ui/input'
 import { Select } from '../ui/select'
 import { Button } from '../ui/button'
 import { createLoteSchema } from '../../lib/validations/lote-schemas'
-import type { CreateLoteFormData } from '../../lib/validations/lote-schemas'
-import type { Lote } from '../../types'
+import type { CreateLoteFormData, CreateLoteOutputData } from '../../lib/validations/lote-schemas'
+import type { Lote, TipoProduccionGanadera } from '../../types'
 
 interface LoteFormModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: CreateLoteFormData) => Promise<void>
+  // onSubmit receives the post-transform output (empty strings cleaned, livestock fields cleared
+  // when actividad != 'ganaderia') which is type-compatible with store's CreateLoteData
+  onSubmit: (data: CreateLoteOutputData) => Promise<void>
   lote?: Lote | null
   isSaving: boolean
 }
@@ -22,6 +24,14 @@ const actividadOptions = [
   { value: 'ganaderia', label: 'Ganadería' },
 ]
 
+// F-021: Options for livestock production type select
+const tipoProduccionOptions = [
+  { value: 'cria', label: 'Cría' },
+  { value: 'recria', label: 'Recría' },
+  { value: 'engorde', label: 'Engorde' },
+  { value: 'tambo', label: 'Tambo' },
+]
+
 export function LoteFormModal({ isOpen, onClose, onSubmit, lote, isSaving }: LoteFormModalProps) {
   const isEditing = Boolean(lote)
 
@@ -29,8 +39,9 @@ export function LoteFormModal({ isOpen, onClose, onSubmit, lote, isSaving }: Lot
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
-  } = useForm<CreateLoteFormData>({
+  } = useForm<CreateLoteFormData, unknown, CreateLoteOutputData>({
     resolver: zodResolver(createLoteSchema),
     defaultValues: {
       nombre: '',
@@ -39,8 +50,16 @@ export function LoteFormModal({ isOpen, onClose, onSubmit, lote, isSaving }: Lot
       ubicacion: '',
       latitud: undefined,
       longitud: undefined,
+      // F-021: Livestock default values
+      cabezas: undefined,
+      raza: '',
+      tipoProduccion: '' as TipoProduccionGanadera | '',
+      categoriaAnimal: '',
     },
   })
+
+  // Watch actividad to conditionally show livestock fields
+  const actividad = watch('actividad')
 
   // Populate form when editing
   useEffect(() => {
@@ -52,6 +71,11 @@ export function LoteFormModal({ isOpen, onClose, onSubmit, lote, isSaving }: Lot
         ubicacion: lote.ubicacion ?? '',
         latitud: lote.latitud,
         longitud: lote.longitud,
+        // F-021: Populate livestock fields when editing
+        cabezas: lote.cabezas,
+        raza: lote.raza ?? '',
+        tipoProduccion: lote.tipoProduccion ?? '',
+        categoriaAnimal: lote.categoriaAnimal ?? '',
       })
     } else {
       reset({
@@ -61,11 +85,16 @@ export function LoteFormModal({ isOpen, onClose, onSubmit, lote, isSaving }: Lot
         ubicacion: '',
         latitud: undefined,
         longitud: undefined,
+        // F-021: Livestock default values for new lote
+        cabezas: undefined,
+        raza: '',
+        tipoProduccion: '' as TipoProduccionGanadera | '',
+        categoriaAnimal: '',
       })
     }
   }, [lote, reset, isOpen])
 
-  async function handleFormSubmit(data: CreateLoteFormData) {
+  async function handleFormSubmit(data: CreateLoteOutputData) {
     await onSubmit(data)
     reset()
   }
@@ -110,6 +139,44 @@ export function LoteFormModal({ isOpen, onClose, onSubmit, lote, isSaving }: Lot
           error={errors.actividad?.message}
           {...register('actividad')}
         />
+
+        {/* F-021: Livestock fields — shown only when actividad is ganaderia */}
+        {actividad === 'ganaderia' && (
+          <div className="flex flex-col gap-3 p-4 bg-parchment rounded-sm border border-border-warm">
+            <p className="text-sm font-semibold text-text-primary">Datos del rodeo</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="Cabezas"
+                type="number"
+                step="1"
+                min="1"
+                placeholder="Ej: 150"
+                error={errors.cabezas?.message}
+                {...register('cabezas', { valueAsNumber: true })}
+              />
+              <Select
+                label="Tipo de producción"
+                options={tipoProduccionOptions}
+                error={errors.tipoProduccion?.message}
+                {...register('tipoProduccion')}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="Raza predominante"
+                placeholder="Ej: Angus"
+                error={errors.raza?.message}
+                {...register('raza')}
+              />
+              <Input
+                label="Categoría"
+                placeholder="Ej: Vacas de cría"
+                error={errors.categoriaAnimal?.message}
+                {...register('categoriaAnimal')}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Ubicacion (opcional) */}
         <Input

@@ -32,6 +32,11 @@ let mockLotesDB: Lote[] = [
     longitud: -58.3916,
     costoTotal: 0,
     ultimoEvento: undefined,
+    // F-021: Livestock demo data
+    cabezas: 180,
+    raza: 'Angus',
+    tipoProduccion: 'cria',
+    categoriaAnimal: 'Vacas de cria',
     deletedAt: undefined,
     createdAt: '2026-01-11T09:00:00.000Z',
     updatedAt: '2026-01-11T09:00:00.000Z',
@@ -86,6 +91,11 @@ export async function mockCreateLote(data: CreateLoteData, tenantId: string): Pr
     longitud: data.longitud,
     costoTotal: 0,
     ultimoEvento: undefined,
+    // F-021: Propagate livestock fields from creation data
+    cabezas: data.cabezas,
+    raza: data.raza,
+    tipoProduccion: data.tipoProduccion,
+    categoriaAnimal: data.categoriaAnimal,
     deletedAt: undefined,
     createdAt: now,
     updatedAt: now,

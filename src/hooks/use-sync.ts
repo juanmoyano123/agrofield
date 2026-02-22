@@ -3,9 +3,10 @@
  *
  * Manages the sync lifecycle:
  * 1. Reads pending queue items when online
- * 2. Processes items one by one with progress tracking
- * 3. Auto-triggers when connectivity is restored
- * 4. Refreshes pending count every 10 seconds
+ * 2. Collapses duplicate updates using last-write-wins (F-012)
+ * 3. Processes items one by one with progress tracking
+ * 4. Auto-triggers when connectivity is restored
+ * 5. Refreshes pending count every 10 seconds
  *
  * In mock mode (VITE_USE_MOCK_API=true), sync simulates a 300ms
  * delay per item and always succeeds. This allows development and
@@ -14,6 +15,10 @@
  * Concurrency protection:
  *   Uses a ref (isSyncingRef) to prevent concurrent sync passes.
  *   React StrictMode double-invocations are handled via cleanup.
+ *
+ * F-012 changes:
+ *   - collapseUpdates() is called before processing to deduplicate updates
+ *   - processQueue is returned so the sync panel can trigger manual syncs
  */
 
 import { useEffect, useRef, useCallback } from 'react'
@@ -27,6 +32,7 @@ import {
   markFailed,
   clearSynced,
 } from '../lib/sync-queue'
+import { collapseUpdates } from '../lib/conflict-resolution'
 
 /** How long to show the success status before resetting to idle (ms) */
 const SUCCESS_DISPLAY_DURATION_MS = 3000
@@ -47,11 +53,19 @@ async function mockSyncItem(): Promise<void> {
   // In mock mode, all items succeed
 }
 
+/** Return type of useSync — exposes processQueue for manual triggering */
+export interface UseSyncReturn {
+  /** Manually trigger a sync pass — safe to call even if already syncing */
+  processQueue: () => Promise<void>
+}
+
 /**
  * Hook that manages the background sync process.
- * Mount once in App.tsx — it has no return value, only side effects.
+ * Mount once in App.tsx.
+ *
+ * @returns { processQueue } — call this to trigger a manual sync (e.g., from the sync panel)
  */
-export function useSync(): void {
+export function useSync(): UseSyncReturn {
   const isOnline = useNetworkStore(s => s.isOnline)
   const setSyncStatus = useNetworkStore(s => s.setSyncStatus)
   const setSyncProgress = useNetworkStore(s => s.setSyncProgress)
@@ -87,26 +101,51 @@ export function useSync(): void {
     isSyncingRef.current = true
 
     try {
-      const items = await getPendingItems(tenantId)
+      const rawItems = await getPendingItems(tenantId)
 
-      if (items.length === 0) {
+      // F-012: Apply last-write-wins conflict resolution before processing.
+      // If the same record was updated multiple times offline, only the most
+      // recent update gets sent to the server. The collapsed items are still
+      // in the DB with 'pending' status — they'll be picked up on the next
+      // pass but getPendingItems will naturally not find them since collapseUpdates
+      // only affects what we process, not what's stored.
+      // Note: The skipped (collapsed) items remain in DB as 'pending'. We mark
+      // them as synced here so they don't accumulate.
+      const collapsedItems = collapseUpdates(rawItems)
+      const skippedItems = rawItems.filter(
+        raw => !collapsedItems.some(c => c.id === raw.id)
+      )
+
+      // Mark collapsed-out items as synced (they're superseded, not actually sent)
+      for (const skipped of skippedItems) {
+        if (skipped.id !== undefined) {
+          await markSynced(skipped.id)
+        }
+      }
+
+      if (collapsedItems.length === 0) {
         isSyncingRef.current = false
+        // Still clean up any synced items that were just marked above
+        if (skippedItems.length > 0) {
+          await clearSynced(tenantId)
+          await refreshPendingCount()
+        }
         return
       }
 
       setSyncStatus('syncing')
-      setSyncProgress({ current: 0, total: items.length })
+      setSyncProgress({ current: 0, total: collapsedItems.length })
       setLastSyncError(null)
 
       let successCount = 0
       let failureCount = 0
 
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i]
+      for (let i = 0; i < collapsedItems.length; i++) {
+        const item = collapsedItems[i]
         if (item.id === undefined) continue
 
         // Update progress display before processing this item
-        setSyncProgress({ current: i, total: items.length })
+        setSyncProgress({ current: i, total: collapsedItems.length })
 
         try {
           await markSyncing(item.id)
@@ -121,7 +160,7 @@ export function useSync(): void {
       }
 
       // Show final progress
-      setSyncProgress({ current: items.length, total: items.length })
+      setSyncProgress({ current: collapsedItems.length, total: collapsedItems.length })
 
       // Clean up synced items
       await clearSynced(tenantId)
@@ -185,4 +224,6 @@ export function useSync(): void {
 
     return () => clearInterval(interval)
   }, [tenantId, refreshPendingCount])
+
+  return { processQueue }
 }

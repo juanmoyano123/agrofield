@@ -14,6 +14,8 @@ import { Button } from '../ui/button'
 import { Alert } from '../ui/alert'
 import { CompraItemRow } from './compra-item-row'
 import { ProveedorInlineForm } from './proveedor-inline-form'
+import { OcrUploadBanner } from './ocr-upload-banner'
+import type { OcrMockResult } from '../../lib/mock/ocr-mock'
 
 interface CompraFormModalProps {
   isOpen: boolean
@@ -65,7 +67,7 @@ export function CompraFormModal({ isOpen, onClose }: CompraFormModalProps) {
     },
   })
 
-  const { fields, append, remove } = useFieldArray({ control, name: 'items' })
+  const { fields, append, remove, replace } = useFieldArray({ control, name: 'items' })
 
   const watchedItems = useWatch({ control, name: 'items' })
   const total = (watchedItems ?? []).reduce((sum, item) => {
@@ -80,6 +82,42 @@ export function CompraFormModal({ isOpen, onClose }: CompraFormModalProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSaving, error])
+
+  /**
+   * Called by OcrUploadBanner when the simulated OCR finishes.
+   * Pre-fills all form fields with the extracted data so the user only needs to review.
+   */
+  function handleOcrResult(result: OcrMockResult) {
+    // Try to match an existing proveedor by name (case-insensitive)
+    const matchedProv = proveedores.find(
+      p => p.name.toLowerCase() === result.proveedorName.toLowerCase()
+    )
+    if (matchedProv) {
+      setValue('proveedorId', matchedProv.id)
+      setValue('proveedorName', matchedProv.name)
+      setShowNewProveedor(false)
+    } else {
+      // Proveedor not found: show the inline creation form pre-filled with the OCR name
+      setValue('proveedorId', '')
+      setValue('proveedorName', result.proveedorName)
+      setShowNewProveedor(true)
+    }
+
+    setValue('fecha', result.fecha)
+    setValue('numeroFactura', result.numeroFactura)
+    setValue('moneda', result.moneda as 'ARS' | 'USD')
+    setValue('notas', result.notas)
+
+    // Replace all items with those extracted by OCR (react-hook-form v7 supports replace)
+    replace(
+      result.items.map(i => ({
+        productoName: i.productoName,
+        cantidad: i.cantidad,
+        unidad: i.unidad,
+        precioUnitario: i.precioUnitario,
+      }))
+    )
+  }
 
   const proveedorOptions = proveedores.map(p => ({ value: p.id, label: p.name }))
 
@@ -122,6 +160,9 @@ export function CompraFormModal({ isOpen, onClose }: CompraFormModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Nueva Compra" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
+
+        {/* OCR banner — must be the first element so it appears at the top of the form */}
+        <OcrUploadBanner onOcrResult={handleOcrResult} />
 
         {/* Proveedor section */}
         <div className="flex flex-col gap-3">

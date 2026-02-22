@@ -1,7 +1,7 @@
 export type { User, Tenant, AuthTokens, LoginCredentials, RegisterData, AuthState, UserRole, InvitationData, LoginAttempts } from './auth'
 export type { ApiResponse, PaginatedResponse } from './api'
 export * from './compras'
-export type { Lote, CreateLoteData, UpdateLoteData, LoteActividad, LotesState } from './lote'
+export type { Lote, CreateLoteData, UpdateLoteData, LoteActividad, LotesState, TipoProduccionGanadera } from './lote'
 export type {
   SyncQueueItem,
   SyncOperation,
@@ -14,3 +14,4 @@ export type {
 export type { BeforeInstallPromptEvent } from './pwa'
 export * from './evento'
 export * from './stock'
+export * from './contratista'

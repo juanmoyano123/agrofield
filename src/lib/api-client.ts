@@ -1,6 +1,7 @@
 import type { User, AuthTokens, LoginCredentials, RegisterData, ApiResponse, Compra, CompraFormData, NuevoProveedorData, Proveedor, Producto } from '../types'
 import type { Lote, CreateLoteData, UpdateLoteData } from '../types'
 import type { Evento, CreateEventoData, UpdateEventoData } from '../types'
+import type { TrabajoContratista, CreateTrabajoData, UpdateTrabajoData, Contratista } from '../types'
 import { mockLogin, mockRegister, mockRefreshToken } from './mock/auth-mock'
 import { mockGetCompras, mockCreateCompra, mockGetProveedores, mockCreateProveedor, mockGetProductos } from './mock/compras-mock'
 import { mockGetMovimientos } from './mock/stock-mock'
@@ -17,6 +18,14 @@ import {
   mockUpdateEvento,
   mockDeleteEvento,
 } from './mock/eventos-mock'
+import {
+  mockGetTrabajos,
+  mockCreateTrabajo,
+  mockUpdateTrabajo,
+  mockDeleteTrabajo,
+  mockGetContratistas,
+  mockCreateContratista,
+} from './mock/contratistas-mock'
 import { getTokens } from './token-storage'
 
 const useMock = import.meta.env.VITE_USE_MOCK_API !== 'false'
@@ -138,6 +147,55 @@ export const productosApi = {
     return fetch(`${import.meta.env.VITE_API_BASE_URL}/stock/movimientos?tenantId=${tenantId}`, {
       headers: getAuthHeaders(),
     }).then(r => r.json() as Promise<ApiResponse<import('../types').StockMovimiento[]>>)
+  },
+}
+
+export const contratistasApi = {
+  getContratistas: (tenantId: string): Promise<ApiResponse<Contratista[]>> => {
+    if (useMock) return mockGetContratistas(tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/contratistas?tenantId=${tenantId}`, {
+      headers: getAuthHeaders(),
+    }).then(r => r.json() as Promise<ApiResponse<Contratista[]>>)
+  },
+  createContratista: (nombre: string, tenantId: string): Promise<ApiResponse<Contratista>> => {
+    if (useMock) return mockCreateContratista(nombre, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/contratistas`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ nombre, tenantId }),
+    }).then(r => r.json() as Promise<ApiResponse<Contratista>>)
+  },
+}
+
+export const trabajosApi = {
+  getTrabajos: (tenantId: string): Promise<ApiResponse<TrabajoContratista[]>> => {
+    if (useMock) return mockGetTrabajos(tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/trabajos?tenantId=${tenantId}`, {
+      headers: getAuthHeaders(),
+    }).then(r => r.json() as Promise<ApiResponse<TrabajoContratista[]>>)
+  },
+  createTrabajo: (data: CreateTrabajoData, tenantId: string): Promise<ApiResponse<TrabajoContratista>> => {
+    if (useMock) return mockCreateTrabajo(data, data.loteId, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/trabajos`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ ...data, tenantId }),
+    }).then(r => r.json() as Promise<ApiResponse<TrabajoContratista>>)
+  },
+  updateTrabajo: (id: string, data: UpdateTrabajoData, tenantId: string): Promise<ApiResponse<TrabajoContratista>> => {
+    if (useMock) return mockUpdateTrabajo(id, data, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/trabajos/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    }).then(r => r.json() as Promise<ApiResponse<TrabajoContratista>>)
+  },
+  deleteTrabajo: (id: string, tenantId: string): Promise<ApiResponse<void>> => {
+    if (useMock) return mockDeleteTrabajo(id, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/trabajos/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    }).then(r => r.json() as Promise<ApiResponse<void>>)
   },
 }
 

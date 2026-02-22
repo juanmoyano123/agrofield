@@ -15,6 +15,11 @@
  * Testability note:
  *   All functions accept an optional `db` parameter to allow test isolation
  *   without module mocking. Defaults to the singleton `db` from db.ts.
+ *
+ * F-012 additions:
+ *   - getAllItems: fetch all items (all statuses) for panel display
+ *   - retryFailed: reset a failed item back to pending for re-processing
+ *   - discardItem: permanently remove an item from the queue
  */
 
 import { db as defaultDb } from './db'
@@ -102,6 +107,25 @@ export async function getPendingItems(tenantId: string, db: AgroFieldDB = defaul
   return items
 }
 
+/**
+ * Get all items in the sync queue for a tenant, regardless of status.
+ * Used by the sync panel to display the full history/queue state.
+ * Ordered by createdAtLocal descending (newest first) and limited to 50
+ * items to avoid overwhelming the UI.
+ *
+ * @param tenantId - Only return items belonging to this tenant
+ * @param db - Optional DB instance (defaults to singleton; override in tests)
+ */
+export async function getAllItems(tenantId: string, db: AgroFieldDB = defaultDb): Promise<SyncQueueItem[]> {
+  const items = await db.syncQueue
+    .where('tenantId')
+    .equals(tenantId)
+    .sortBy('createdAtLocal')
+
+  // Reverse to get newest first and limit to 50
+  return items.reverse().slice(0, 50)
+}
+
 // ---------------------------------------------------------------------------
 // Status transitions
 // ---------------------------------------------------------------------------
@@ -161,6 +185,37 @@ export async function markFailed(
     lastAttemptAt: new Date().toISOString(),
     errorMessage,
   })
+}
+
+// ---------------------------------------------------------------------------
+// F-012: User-initiated actions
+// ---------------------------------------------------------------------------
+
+/**
+ * Reset a failed item back to 'pending' so it will be retried on the next sync pass.
+ * Clears the attempts counter and error message to give the item a fresh start.
+ *
+ * @param id - The sync queue item id to retry
+ * @param db - Optional DB instance (defaults to singleton; override in tests)
+ */
+export async function retryFailed(id: number, db: AgroFieldDB = defaultDb): Promise<void> {
+  await db.syncQueue.update(id, {
+    status: 'pending',
+    attempts: 0,
+    errorMessage: null,
+  })
+}
+
+/**
+ * Permanently delete a queue item.
+ * Used when the user explicitly wants to discard a pending or failed change.
+ * This cannot be undone — the mutation will never be sent to the server.
+ *
+ * @param id - The sync queue item id to discard
+ * @param db - Optional DB instance (defaults to singleton; override in tests)
+ */
+export async function discardItem(id: number, db: AgroFieldDB = defaultDb): Promise<void> {
+  await db.syncQueue.delete(id)
 }
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useLotesStore, getFilteredAndSortedLotes } from '../lotes-store'
-import type { Lote } from '../../types'
+import type { Lote, TipoProduccionGanadera } from '../../types'
 
 vi.mock('../../lib/api-client', () => ({
   lotesApi: {
@@ -34,6 +34,10 @@ const mockLote2: Lote = {
   hectareas: 85,
   actividad: 'ganaderia',
   costoTotal: 0,
+  // F-021: Livestock fields
+  cabezas: 180,
+  raza: 'Angus',
+  tipoProduccion: 'cria' as TipoProduccionGanadera,
   createdAt: '2026-01-11T09:00:00.000Z',
   updatedAt: '2026-01-11T09:00:00.000Z',
 }

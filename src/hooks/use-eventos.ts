@@ -1,3 +1,4 @@
+import { useShallow } from 'zustand/shallow'
 import { useEventosStore, getFilteredEventos } from '../stores/eventos-store'
 
 export function useEventos() {
@@ -20,7 +21,7 @@ export function useEventos() {
   const clearError = useEventosStore(s => s.clearError)
   const clearSuccessMessage = useEventosStore(s => s.clearSuccessMessage)
 
-  const filteredEventos = useEventosStore(getFilteredEventos)
+  const filteredEventos = useEventosStore(useShallow(getFilteredEventos))
 
   return {
     eventos,
