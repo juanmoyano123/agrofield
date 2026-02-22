@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, MapPin, ShoppingCart, Package, Users, LogOut } from 'lucide-react'
+import { LayoutDashboard, MapPin, ShoppingCart, Package, Users, LogOut, Hammer, Map } from 'lucide-react'
 import { useAuth } from '../../hooks/use-auth'
 import { useNetworkStore } from '../../stores/network-store'
 import { SyncStatus } from '../ui/sync-status'
@@ -14,7 +14,8 @@ interface NavItem {
   icon: React.ReactNode
 }
 
-const navItems: NavItem[] = [
+// Core nav items shown in both the desktop sidebar and the mobile bottom nav
+const mobileNavItems: NavItem[] = [
   {
     to: '/dashboard',
     label: 'Dashboard',
@@ -39,6 +40,18 @@ const navItems: NavItem[] = [
     to: '/stock',
     label: 'Stock',
     icon: <Package size={20} />,
+  },
+]
+
+// Desktop sidebar shows all items including Mapa.
+// Mapa is intentionally excluded from the mobile bottom nav to avoid crowding
+// the limited space; users access it from the "Ver mapa" button in Lotes.
+const sidebarNavItems: NavItem[] = [
+  ...mobileNavItems,
+  {
+    to: '/mapa',
+    label: 'Mapa',
+    icon: <Map size={20} />,
   },
 ]
 
@@ -83,7 +96,7 @@ export function AppLayout() {
         {/* Navigation */}
         <nav className="flex-1 py-5" aria-label="Navegación principal">
           <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/25 px-6 mb-2">Principal</p>
-          {navItems.map(item => (
+          {sidebarNavItems.map(item => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -160,12 +173,12 @@ export function AppLayout() {
         <Outlet />
       </main>
 
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Bottom Navigation — shows core items only, Mapa excluded */}
       <nav
         aria-label="Navegación inferior"
         className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-surface border-t border-border-warm flex justify-around items-center z-40"
       >
-        {navItems.map(item => (
+        {mobileNavItems.map(item => (
           <NavLink
             key={item.to}
             to={item.to}

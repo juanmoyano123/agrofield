@@ -14,6 +14,14 @@ const actividadLabel: Record<string, string> = {
   ganaderia: 'Ganadería',
 }
 
+// F-021: Labels for livestock production types
+const tipoProduccionLabel: Record<string, string> = {
+  cria: 'Cría',
+  recria: 'Recría',
+  engorde: 'Engorde',
+  tambo: 'Tambo',
+}
+
 const actividadVariant: Record<string, 'success' | 'warning'> = {
   agricultura: 'success',
   ganaderia: 'warning',
@@ -65,6 +73,26 @@ export function LoteCard({ lote, onEdit, onDelete, onClick }: LoteCardProps) {
           </span>
         )}
       </div>
+
+      {/* F-021: Livestock data — only shown for ganaderia lotes that have cabezas set */}
+      {lote.actividad === 'ganaderia' && lote.cabezas && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-dim mt-2">
+          <span>
+            <span className="font-semibold text-text-primary">{lote.cabezas.toLocaleString('es-AR')}</span>
+            {' '}cabezas
+          </span>
+          {lote.raza && (
+            <span>
+              Raza: <span className="font-semibold text-text-primary">{lote.raza}</span>
+            </span>
+          )}
+          {lote.tipoProduccion && (
+            <span className="text-xs bg-parchment border border-border-warm px-2 py-0.5 rounded-sm">
+              {tipoProduccionLabel[lote.tipoProduccion]}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Placeholders */}
       <div className="flex items-center gap-6 text-xs text-text-muted pt-1 border-t border-border-warm">

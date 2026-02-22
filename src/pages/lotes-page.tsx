@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, SlidersHorizontal, Plus } from 'lucide-react'
+import { Search, SlidersHorizontal, Plus, Map } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import { useLotes } from '../hooks/use-lotes'
 import { LoteCard } from '../components/lotes/lote-card'
@@ -11,7 +11,7 @@ import { Alert } from '../components/ui/alert'
 import { Spinner } from '../components/ui/spinner'
 import { Button } from '../components/ui/button'
 import type { Lote, LoteActividad } from '../types'
-import type { CreateLoteFormData } from '../lib/validations/lote-schemas'
+import type { CreateLoteOutputData } from '../lib/validations/lote-schemas'
 
 export function LotesPage() {
   const navigate = useNavigate()
@@ -78,7 +78,7 @@ export function LotesPage() {
     setDeletingLote(null)
   }
 
-  async function handleFormSubmit(data: CreateLoteFormData) {
+  async function handleFormSubmit(data: CreateLoteOutputData) {
     if (!user) return
     if (editingLote) {
       await updateLote(editingLote.id, data, user.tenantId)
@@ -120,8 +120,12 @@ export function LotesPage() {
             Gestión de lotes y superficies del campo
           </p>
         </div>
-        {/* Desktop: button in header */}
-        <div className="hidden sm:block">
+        {/* Desktop: buttons in header */}
+        <div className="hidden sm:flex items-center gap-2">
+          <Button type="button" variant="ghost" onClick={() => navigate('/mapa')}>
+            <Map size={18} />
+            Ver mapa
+          </Button>
           <Button type="button" variant="primary" onClick={handleOpenCreate}>
             <Plus size={18} />
             Nuevo lote
