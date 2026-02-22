@@ -23,6 +23,16 @@ const mockUsers: StoredUser[] = [
     tenantName: 'Estancia La Esperanza',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
+  {
+    id: 'user-demo-002',
+    email: 'encargado@agrofield.com',
+    name: 'Roberto Gonzalez',
+    password: 'password123',
+    role: 'encargado' as const,
+    tenantId: 'tenant-demo-001',
+    tenantName: 'Estancia La Esperanza',
+    createdAt: '2026-01-15T00:00:00.000Z',
+  },
 ]
 
 function generateFakeToken(userId: string, tenantId: string): string {
