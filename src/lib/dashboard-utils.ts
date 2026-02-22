@@ -1,4 +1,6 @@
 import type { Compra, TrabajoContratista } from '../types'
+import type { Evento } from '../types'
+import { computeCostosAllLotes } from './imputacion-utils'
 
 export type PeriodOption = 'this-month' | 'last-3' | 'last-6' | 'this-year' | 'all'
 
@@ -238,4 +240,84 @@ export function computeCashflow(
     saldoNeto: -(totals.compras + totals.trabajos),
     mensual,
   }
+}
+
+// ---------------------------------------------------------------------------
+// F-007: Costo por Lote — period-aware aggregation
+// ---------------------------------------------------------------------------
+
+/** One row per lote in the Costo por Lote dashboard widget */
+export interface CostoLoteRow {
+  loteId: string
+  nombre: string
+  hectareas: number
+  costoEventos: number
+  costoTrabajos: number
+  costoTotal: number
+  costoPorHa: number
+}
+
+/**
+ * Computes cost-per-lote rows filtered to the given period.
+ *
+ * Filtering is applied to eventos and trabajos before aggregation so that
+ * only records within the selected date range contribute to the totals.
+ * Rows with zero total cost are excluded. Results are sorted descending
+ * by costoPorHa (highest first).
+ *
+ * @param lotes   - Active lotes (id, nombre, hectareas)
+ * @param eventos - All eventos from the store (including deleted)
+ * @param trabajos - All trabajos from the store (including deleted)
+ * @param periodo - Period option for date-range filtering
+ */
+export function computeCostosAllLotesByPeriod(
+  lotes: Array<{ id: string; nombre: string; hectareas: number }>,
+  eventos: Evento[],
+  trabajos: TrabajoContratista[],
+  periodo: PeriodOption,
+): CostoLoteRow[] {
+  const range = getPeriodRange(periodo)
+
+  // Filter eventos by date range and exclude soft-deleted records
+  const eventosFiltrados = range
+    ? eventos.filter(
+        e =>
+          !e.deletedAt &&
+          e.fecha >= range.desde.toISOString().slice(0, 10) &&
+          e.fecha <= range.hasta.toISOString().slice(0, 10),
+      )
+    : eventos.filter(e => !e.deletedAt)
+
+  // Filter trabajos by date range and exclude soft-deleted records
+  const trabajosFiltrados = range
+    ? trabajos.filter(
+        t =>
+          !t.deletedAt &&
+          t.fecha >= range.desde.toISOString().slice(0, 10) &&
+          t.fecha <= range.hasta.toISOString().slice(0, 10),
+      )
+    : trabajos.filter(t => !t.deletedAt)
+
+  // Delegate to the O(M+K) aggregation engine
+  const costosMap = computeCostosAllLotes(lotes, eventosFiltrados, trabajosFiltrados)
+
+  return lotes
+    .map(lote => {
+      const costo = costosMap.get(lote.id) ?? {
+        loteId: lote.id,
+        costoEventos: 0,
+        costoTrabajos: 0,
+        costoTotal: 0,
+        costoPorHa: 0,
+      }
+      return {
+        ...costo,
+        nombre: lote.nombre,
+        hectareas: lote.hectareas,
+      }
+    })
+    // Drop lotes with no costs in this period
+    .filter(r => r.costoTotal > 0)
+    // Highest $/ha first
+    .sort((a, b) => b.costoPorHa - a.costoPorHa)
 }
