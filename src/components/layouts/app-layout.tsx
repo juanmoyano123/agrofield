@@ -41,6 +41,11 @@ const mobileNavItems: NavItem[] = [
     label: 'Stock',
     icon: <Package size={20} />,
   },
+  {
+    to: '/operaciones',
+    label: 'Operaciones',
+    icon: <Hammer size={20} />,
+  },
 ]
 
 // Desktop sidebar shows all items including Mapa.
