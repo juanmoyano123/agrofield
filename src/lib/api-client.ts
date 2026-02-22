@@ -3,6 +3,7 @@ import type { Lote, CreateLoteData, UpdateLoteData } from '../types'
 import type { Evento, CreateEventoData, UpdateEventoData } from '../types'
 import { mockLogin, mockRegister, mockRefreshToken } from './mock/auth-mock'
 import { mockGetCompras, mockCreateCompra, mockGetProveedores, mockCreateProveedor, mockGetProductos } from './mock/compras-mock'
+import { mockGetMovimientos } from './mock/stock-mock'
 import {
   mockGetLotes,
   mockGetLoteById,
@@ -131,6 +132,12 @@ export const productosApi = {
     if (useMock) return mockGetProductos(tenantId)
     return fetch(`${import.meta.env.VITE_API_BASE_URL}/productos?tenantId=${tenantId}`)
       .then(r => r.json() as Promise<ApiResponse<Producto[]>>)
+  },
+  getMovimientos: (tenantId: string): Promise<ApiResponse<import('../types').StockMovimiento[]>> => {
+    if (useMock) return mockGetMovimientos(tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/stock/movimientos?tenantId=${tenantId}`, {
+      headers: getAuthHeaders(),
+    }).then(r => r.json() as Promise<ApiResponse<import('../types').StockMovimiento[]>>)
   },
 }
 
