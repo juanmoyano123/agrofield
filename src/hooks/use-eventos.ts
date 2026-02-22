@@ -11,6 +11,7 @@ export function useEventos() {
   const filterFechaDesde = useEventosStore(s => s.filterFechaDesde)
   const filterFechaHasta = useEventosStore(s => s.filterFechaHasta)
   const fetchEventos = useEventosStore(s => s.fetchEventos)
+  const fetchAllEventos = useEventosStore(s => s.fetchAllEventos)
   const createEvento = useEventosStore(s => s.createEvento)
   const updateEvento = useEventosStore(s => s.updateEvento)
   const deleteEvento = useEventosStore(s => s.deleteEvento)
@@ -34,6 +35,7 @@ export function useEventos() {
     filterFechaDesde,
     filterFechaHasta,
     fetchEventos,
+    fetchAllEventos,
     createEvento,
     updateEvento,
     deleteEvento,

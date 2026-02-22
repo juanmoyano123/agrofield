@@ -14,6 +14,7 @@ import {
 } from './mock/lotes-mock'
 import {
   mockGetEventosByLote,
+  mockGetAllEventos,
   mockCreateEvento,
   mockUpdateEvento,
   mockDeleteEvento,
@@ -203,6 +204,13 @@ export const eventosApi = {
   getEventosByLote: (loteId: string, tenantId: string): Promise<ApiResponse<Evento[]>> => {
     if (useMock) return mockGetEventosByLote(loteId, tenantId)
     return fetch(`${import.meta.env.VITE_API_BASE_URL}/lotes/${loteId}/eventos`, {
+      headers: getAuthHeaders(),
+    }).then(r => r.json() as Promise<ApiResponse<Evento[]>>)
+  },
+  // F-005: Fetch all eventos for a tenant (cross-lote) for imputacion engine
+  getAllEventos: (tenantId: string): Promise<ApiResponse<Evento[]>> => {
+    if (useMock) return mockGetAllEventos(tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/eventos?tenantId=${tenantId}`, {
       headers: getAuthHeaders(),
     }).then(r => r.json() as Promise<ApiResponse<Evento[]>>)
   },

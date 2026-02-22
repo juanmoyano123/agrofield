@@ -5,6 +5,8 @@ import { eventosApi } from '../lib/api-client'
 
 interface EventosActions {
   fetchEventos: (loteId: string, tenantId: string) => Promise<void>
+  /** F-005: Fetch all eventos across all lotes for a tenant (used by imputacion engine) */
+  fetchAllEventos: (tenantId: string) => Promise<void>
   createEvento: (data: CreateEventoData, loteId: string, tenantId: string) => Promise<void>
   updateEvento: (id: string, data: UpdateEventoData, tenantId: string) => Promise<void>
   deleteEvento: (id: string, tenantId: string) => Promise<void>
@@ -39,6 +41,17 @@ export const useEventosStore = create<EventosStore>()(
         const response = await eventosApi.getEventosByLote(loteId, tenantId)
         if (!response.success || !response.data) {
           set({ isLoading: false, error: response.error?.message ?? 'Error al cargar los eventos' })
+          return
+        }
+        set({ eventos: response.data, isLoading: false })
+      },
+
+      // F-005: Load all eventos for the tenant to power the imputacion engine
+      fetchAllEventos: async (tenantId) => {
+        set({ isLoading: true, error: null })
+        const response = await eventosApi.getAllEventos(tenantId)
+        if (!response.success || !response.data) {
+          set({ isLoading: false, error: response.error?.message ?? 'Error al cargar eventos' })
           return
         }
         set({ eventos: response.data, isLoading: false })

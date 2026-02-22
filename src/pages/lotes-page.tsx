@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { Search, SlidersHorizontal, Plus, Map } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import { useLotes } from '../hooks/use-lotes'
+import { useEventos } from '../hooks/use-eventos'
+import { useImputacionGlobal } from '../hooks/use-imputacion'
+import { useTrabajosStore } from '../stores/contratistas-store'
 import { LoteCard } from '../components/lotes/lote-card'
 import { LoteFormModal } from '../components/lotes/lote-form-modal'
 import { ConfirmDialog } from '../components/ui/confirm-dialog'
@@ -38,6 +41,10 @@ export function LotesPage() {
     clearSuccessMessage,
   } = useLotes()
 
+  // F-005: Imputacion — fetch all eventos + trabajos and derive costs per lote
+  const { fetchAllEventos } = useEventos()
+  const costosMap = useImputacionGlobal()
+
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingLote, setEditingLote] = useState<Lote | null>(null)
   const [deletingLote, setDeletingLote] = useState<Lote | null>(null)
@@ -46,7 +53,11 @@ export function LotesPage() {
   useEffect(() => {
     if (!user) return
     void fetchLotes(user.tenantId)
-  }, [user, fetchLotes])
+    // F-005: Also fetch all eventos and trabajos so the imputacion engine
+    // can compute cross-lote cost aggregations without per-lote API calls
+    void fetchAllEventos(user.tenantId)
+    void useTrabajosStore.getState().fetchTrabajos(user.tenantId)
+  }, [user, fetchLotes, fetchAllEventos])
 
   // Auto-dismiss success message after 3 seconds
   useEffect(() => {
@@ -265,6 +276,7 @@ export function LotesPage() {
                   onEdit={handleOpenEdit}
                   onDelete={handleOpenDelete}
                   onClick={() => navigate(`/lotes/${lote.id}/eventos`)}
+                  costoLote={costosMap.get(lote.id)}
                 />
               ))}
             </div>

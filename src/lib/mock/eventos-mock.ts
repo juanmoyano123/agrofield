@@ -197,3 +197,12 @@ export async function mockDeleteEvento(id: string, tenantId: string): Promise<Ap
   }
   return { success: true }
 }
+
+/**
+ * F-005: Returns all non-deleted eventos for a tenant, across all lotes.
+ * Used by the imputacion engine to compute cross-lote cost aggregations.
+ */
+export async function mockGetAllEventos(tenantId: string): Promise<ApiResponse<Evento[]>> {
+  await randomDelay()
+  return { success: true, data: mockEventosDB.filter(e => e.tenantId === tenantId && !e.deletedAt) }
+}

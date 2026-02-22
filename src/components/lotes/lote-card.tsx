@@ -1,12 +1,15 @@
 import { Pencil, Trash2, MapPin } from 'lucide-react'
 import { Badge } from '../ui/badge'
 import type { Lote } from '../../types'
+import type { CostoLote } from '../../lib/imputacion-utils'
 
 interface LoteCardProps {
   lote: Lote
   onEdit: (lote: Lote) => void
   onDelete: (lote: Lote) => void
   onClick?: (lote: Lote) => void
+  /** F-005: Derived cost data for this lote from the imputacion engine */
+  costoLote?: CostoLote
 }
 
 const actividadLabel: Record<string, string> = {
@@ -27,7 +30,7 @@ const actividadVariant: Record<string, 'success' | 'warning'> = {
   ganaderia: 'warning',
 }
 
-export function LoteCard({ lote, onEdit, onDelete, onClick }: LoteCardProps) {
+export function LoteCard({ lote, onEdit, onDelete, onClick, costoLote }: LoteCardProps) {
   function handleEdit(e: React.MouseEvent) {
     e.stopPropagation()
     onEdit(lote)
@@ -94,14 +97,26 @@ export function LoteCard({ lote, onEdit, onDelete, onClick }: LoteCardProps) {
         </div>
       )}
 
-      {/* Placeholders */}
-      <div className="flex items-center gap-6 text-xs text-text-muted pt-1 border-t border-border-warm">
-        <span>
-          Último evento: <span className="text-text-muted">{lote.ultimoEvento ?? '—'}</span>
-        </span>
-        <span>
-          Costo acumulado: <span className="text-text-muted">—</span>
-        </span>
+      {/* Costo acumulado — powered by F-005 imputacion engine */}
+      <div className="pt-1 border-t border-border-warm">
+        <div className="flex items-center gap-6 text-xs text-text-muted mb-2">
+          <span>
+            Último evento: <span className="text-text-muted">{lote.ultimoEvento ?? '—'}</span>
+          </span>
+        </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-text-muted">Costo acumulado</span>
+          <div className="text-right">
+            <span className="font-semibold text-text-primary">
+              {costoLote ? `$${costoLote.costoTotal.toLocaleString('es-AR', { maximumFractionDigits: 0 })}` : '—'}
+            </span>
+            {costoLote && costoLote.costoPorHa > 0 && (
+              <span className="text-xs text-text-muted block">
+                ${costoLote.costoPorHa.toLocaleString('es-AR', { maximumFractionDigits: 0 })}/ha
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Actions */}
