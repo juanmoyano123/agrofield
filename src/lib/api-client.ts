@@ -2,6 +2,7 @@ import type { User, AuthTokens, LoginCredentials, RegisterData, ApiResponse, Com
 import type { Lote, CreateLoteData, UpdateLoteData } from '../types'
 import type { Evento, CreateEventoData, UpdateEventoData } from '../types'
 import type { TrabajoContratista, CreateTrabajoData, UpdateTrabajoData, Contratista } from '../types'
+import type { EventoRodeo, CreateEventoRodeoData, UpdateEventoRodeoData } from '../types'
 import { mockLogin, mockRegister, mockRefreshToken } from './mock/auth-mock'
 import { mockGetCompras, mockCreateCompra, mockGetProveedores, mockCreateProveedor, mockGetProductos } from './mock/compras-mock'
 import { mockGetMovimientos } from './mock/stock-mock'
@@ -27,6 +28,12 @@ import {
   mockGetContratistas,
   mockCreateContratista,
 } from './mock/contratistas-mock'
+import {
+  mockGetEventosRodeoByLote,
+  mockCreateEventoRodeo,
+  mockUpdateEventoRodeo,
+  mockDeleteEventoRodeo,
+} from './mock/rodeo-mock'
 import { getTokens } from './token-storage'
 
 const useMock = import.meta.env.VITE_USE_MOCK_API !== 'false'
@@ -194,6 +201,38 @@ export const trabajosApi = {
   deleteTrabajo: (id: string, tenantId: string): Promise<ApiResponse<void>> => {
     if (useMock) return mockDeleteTrabajo(id, tenantId)
     return fetch(`${import.meta.env.VITE_API_BASE_URL}/trabajos/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    }).then(r => r.json() as Promise<ApiResponse<void>>)
+  },
+}
+
+export const rodeoApi = {
+  getEventosRodeoByLote: (loteId: string, tenantId: string): Promise<ApiResponse<EventoRodeo[]>> => {
+    if (useMock) return mockGetEventosRodeoByLote(loteId, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/lotes/${loteId}/rodeo`, {
+      headers: getAuthHeaders(),
+    }).then(r => r.json() as Promise<ApiResponse<EventoRodeo[]>>)
+  },
+  createEventoRodeo: (data: CreateEventoRodeoData, loteId: string, tenantId: string): Promise<ApiResponse<EventoRodeo>> => {
+    if (useMock) return mockCreateEventoRodeo(data, loteId, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/lotes/${loteId}/rodeo`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ ...data, tenantId }),
+    }).then(r => r.json() as Promise<ApiResponse<EventoRodeo>>)
+  },
+  updateEventoRodeo: (id: string, data: UpdateEventoRodeoData, tenantId: string): Promise<ApiResponse<EventoRodeo>> => {
+    if (useMock) return mockUpdateEventoRodeo(id, data, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/rodeo/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    }).then(r => r.json() as Promise<ApiResponse<EventoRodeo>>)
+  },
+  deleteEventoRodeo: (id: string, tenantId: string): Promise<ApiResponse<void>> => {
+    if (useMock) return mockDeleteEventoRodeo(id, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/rodeo/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     }).then(r => r.json() as Promise<ApiResponse<void>>)

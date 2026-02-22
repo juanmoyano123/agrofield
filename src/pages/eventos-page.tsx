@@ -3,31 +3,40 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import { useEventos } from '../hooks/use-eventos'
+import { useRodeo } from '../hooks/use-rodeo'
 import { useLotes } from '../hooks/use-lotes'
 import { useImputacionLote } from '../hooks/use-imputacion'
 import { productosApi } from '../lib/api-client'
 import { EventoTimeline } from '../components/eventos/evento-timeline'
 import { EventosFilters } from '../components/eventos/eventos-filters'
 import { EventoFormModal } from '../components/eventos/evento-form-modal'
+import { RodeoTimeline } from '../components/rodeo/rodeo-timeline'
+import { RodeoFilters } from '../components/rodeo/rodeo-filters'
+import { RodeoFormModal } from '../components/rodeo/rodeo-form-modal'
 import { ConfirmDialog } from '../components/ui/confirm-dialog'
 import { Alert } from '../components/ui/alert'
 import { Spinner } from '../components/ui/spinner'
 import { Button } from '../components/ui/button'
 import { CostoResumenBar } from '../components/costos/costo-resumen-bar'
 import { CostoDesglose } from '../components/costos/costo-desglose'
-import type { Evento, Producto, TipoEvento } from '../types'
+import type { Evento, Producto, TipoEvento, EventoRodeo } from '../types'
 import type { EventoFormSchema } from '../lib/validations/evento-schemas'
+import type { CreateEventoRodeoSchema } from '../lib/validations/rodeo-schemas'
+
+type ActiveTab = 'eventos' | 'rodeo'
 
 export function EventosPage() {
   const { id: loteId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
+
+  // Eventos (agricultura) state and actions
   const {
     filteredEventos,
-    isLoading,
-    isSaving,
-    error,
-    successMessage,
+    isLoading: eventosLoading,
+    isSaving: eventosSaving,
+    error: eventosError,
+    successMessage: eventosSuccess,
     filterTipo,
     filterFechaDesde,
     filterFechaHasta,
@@ -38,24 +47,56 @@ export function EventosPage() {
     setFilterTipo,
     setFilterFechaDesde,
     setFilterFechaHasta,
-    clearFilters,
-    clearError,
-    clearSuccessMessage,
+    clearFilters: clearEventosFilters,
+    clearError: clearEventosError,
+    clearSuccessMessage: clearEventosSuccess,
   } = useEventos()
+
+  // Rodeo (ganaderia) state and actions
+  const {
+    filteredEventosRodeo,
+    isLoading: rodeoLoading,
+    isSaving: rodeoSaving,
+    error: rodeoError,
+    successMessage: rodeoSuccess,
+    filterCategoria,
+    filterFechaDesde: rodeoFechaDesde,
+    filterFechaHasta: rodeoFechaHasta,
+    fetchEventosRodeo,
+    createEventoRodeo,
+    updateEventoRodeo,
+    deleteEventoRodeo,
+    setFilterCategoria,
+    setFilterFechaDesde: setRodeoFechaDesde,
+    setFilterFechaHasta: setRodeoFechaHasta,
+    clearFilters: clearRodeoFilters,
+    clearError: clearRodeoError,
+    clearSuccessMessage: clearRodeoSuccess,
+  } = useRodeo()
+
   const { lotes, fetchLotes } = useLotes()
 
   const [productos, setProductos] = useState<Producto[]>([])
-  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<ActiveTab>('eventos')
+
+  // Eventos form/delete state
+  const [isEventoFormOpen, setIsEventoFormOpen] = useState(false)
   const [editingEvento, setEditingEvento] = useState<Evento | null>(null)
   const [deletingEvento, setDeletingEvento] = useState<Evento | null>(null)
 
+  // Rodeo form/delete state
+  const [isRodeoFormOpen, setIsRodeoFormOpen] = useState(false)
+  const [editingEventoRodeo, setEditingEventoRodeo] = useState<EventoRodeo | null>(null)
+  const [deletingEventoRodeo, setDeletingEventoRodeo] = useState<EventoRodeo | null>(null)
+
   const lote = lotes.find(l => l.id === loteId)
+  const isGanaderia = lote?.actividad === 'ganaderia'
 
   // F-016: Derived cost data for this lote — includes eventos + contratistas
   const { costo, lineas } = useImputacionLote(loteId ?? '', lote?.hectareas ?? 0)
   const [isCostoExpanded, setIsCostoExpanded] = useState(false)
 
-  // Fetch on mount
+  // Fetch on mount: always fetch eventos; fetch rodeo only for ganaderia lotes
   useEffect(() => {
     if (!user || !loteId) return
     void fetchEventos(loteId, user.tenantId)
@@ -65,43 +106,63 @@ export function EventosPage() {
     })
   }, [user, loteId, fetchEventos, fetchLotes])
 
-  // Auto-dismiss success message
+  // Fetch rodeo data when tab switches to 'rodeo' or when lote turns out to be ganaderia
   useEffect(() => {
-    if (!successMessage) return
-    const timer = setTimeout(() => clearSuccessMessage(), 3000)
+    if (!user || !loteId || !isGanaderia) return
+    void fetchEventosRodeo(loteId, user.tenantId)
+  }, [user, loteId, isGanaderia, fetchEventosRodeo])
+
+  // For ganaderia lotes, default to rodeo tab on first load
+  useEffect(() => {
+    if (isGanaderia) {
+      setActiveTab('rodeo')
+    }
+  }, [isGanaderia])
+
+  // Auto-dismiss success messages
+  useEffect(() => {
+    if (!eventosSuccess) return
+    const timer = setTimeout(() => clearEventosSuccess(), 3000)
     return () => clearTimeout(timer)
-  }, [successMessage, clearSuccessMessage])
+  }, [eventosSuccess, clearEventosSuccess])
 
-  function handleOpenCreate() {
+  useEffect(() => {
+    if (!rodeoSuccess) return
+    const timer = setTimeout(() => clearRodeoSuccess(), 3000)
+    return () => clearTimeout(timer)
+  }, [rodeoSuccess, clearRodeoSuccess])
+
+  // --- Eventos handlers ---
+  function handleOpenCreateEvento() {
     setEditingEvento(null)
-    setIsFormOpen(true)
+    setIsEventoFormOpen(true)
   }
 
-  function handleOpenEdit(evento: Evento) {
+  function handleOpenEditEvento(evento: Evento) {
     setEditingEvento(evento)
-    setIsFormOpen(true)
+    setIsEventoFormOpen(true)
   }
 
-  function handleCloseForm() {
-    setIsFormOpen(false)
+  function handleCloseEventoForm() {
+    setIsEventoFormOpen(false)
     setEditingEvento(null)
   }
 
-  function handleOpenDelete(evento: Evento) {
+  function handleOpenDeleteEvento(evento: Evento) {
     setDeletingEvento(evento)
   }
 
-  function handleCancelDelete() {
+  function handleCancelDeleteEvento() {
     setDeletingEvento(null)
   }
 
-  async function handleConfirmDelete() {
+  async function handleConfirmDeleteEvento() {
     if (!deletingEvento || !user) return
     await deleteEvento(deletingEvento.id, user.tenantId)
     setDeletingEvento(null)
   }
 
-  function handleFormSubmit(data: EventoFormSchema) {
+  function handleEventoFormSubmit(data: EventoFormSchema) {
     if (!user || !loteId) return
     const createData = {
       tipo: data.tipo,
@@ -117,6 +178,49 @@ export function EventosPage() {
       void createEvento(createData, loteId, user.tenantId)
     }
   }
+
+  // --- Rodeo handlers ---
+  function handleOpenCreateRodeo() {
+    setEditingEventoRodeo(null)
+    setIsRodeoFormOpen(true)
+  }
+
+  function handleOpenEditRodeo(evento: EventoRodeo) {
+    setEditingEventoRodeo(evento)
+    setIsRodeoFormOpen(true)
+  }
+
+  function handleCloseRodeoForm() {
+    setIsRodeoFormOpen(false)
+    setEditingEventoRodeo(null)
+  }
+
+  function handleOpenDeleteRodeo(evento: EventoRodeo) {
+    setDeletingEventoRodeo(evento)
+  }
+
+  function handleCancelDeleteRodeo() {
+    setDeletingEventoRodeo(null)
+  }
+
+  async function handleConfirmDeleteRodeo() {
+    if (!deletingEventoRodeo || !user) return
+    await deleteEventoRodeo(deletingEventoRodeo.id, user.tenantId)
+    setDeletingEventoRodeo(null)
+  }
+
+  function handleRodeoFormSubmit(data: CreateEventoRodeoSchema) {
+    if (!user || !loteId) return
+    if (editingEventoRodeo) {
+      void updateEventoRodeo(editingEventoRodeo.id, data, user.tenantId)
+    } else {
+      void createEventoRodeo(data, loteId, user.tenantId)
+    }
+  }
+
+  // Determine current tab loading/saving state for FAB and button
+  const isCurrentTabLoading = activeTab === 'rodeo' ? rodeoLoading : eventosLoading
+  const handleAddClick = activeTab === 'rodeo' ? handleOpenCreateRodeo : handleOpenCreateEvento
 
   return (
     <div className="flex flex-col gap-6 pb-24 sm:pb-8">
@@ -148,36 +252,83 @@ export function EventosPage() {
             )}
           </div>
         </div>
-        {/* Desktop button */}
+
+        {/* Desktop: add button */}
         <div className="hidden sm:block shrink-0">
-          <Button type="button" variant="primary" onClick={handleOpenCreate}>
+          <Button type="button" variant="primary" onClick={handleAddClick}>
             <Plus size={18} />
-            Registrar evento
+            {activeTab === 'rodeo' ? 'Registrar evento de rodeo' : 'Registrar evento'}
           </Button>
         </div>
       </div>
 
-      {/* Feedback */}
-      {error && (
+      {/* Tab selector — only visible for ganaderia lotes */}
+      {isGanaderia && (
+        <div className="flex gap-1 p-1 bg-parchment border border-border-warm rounded-sm w-fit">
+          <button
+            type="button"
+            onClick={() => setActiveTab('eventos')}
+            className={`
+              px-4 py-2 rounded-sm text-sm font-semibold transition-colors duration-200
+              ${activeTab === 'eventos'
+                ? 'bg-surface text-text-primary shadow-warm-sm border border-border-warm'
+                : 'text-text-muted hover:text-text-dim'
+              }
+            `}
+          >
+            Eventos
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('rodeo')}
+            className={`
+              px-4 py-2 rounded-sm text-sm font-semibold transition-colors duration-200
+              ${activeTab === 'rodeo'
+                ? 'bg-[#4A7C59] text-white shadow-warm-sm'
+                : 'text-text-muted hover:text-text-dim'
+              }
+            `}
+          >
+            Rodeo
+          </button>
+        </div>
+      )}
+
+      {/* Feedback for active tab */}
+      {activeTab === 'eventos' && eventosError && (
         <Alert variant="error">
-          {error}
-          <button type="button" onClick={clearError} className="ml-2 underline text-xs" aria-label="Cerrar error">
+          {eventosError}
+          <button type="button" onClick={clearEventosError} className="ml-2 underline text-xs" aria-label="Cerrar error">
             Cerrar
           </button>
         </Alert>
       )}
-      {successMessage && <Alert variant="success">{successMessage}</Alert>}
+      {activeTab === 'eventos' && eventosSuccess && (
+        <Alert variant="success">{eventosSuccess}</Alert>
+      )}
 
-      {/* Loading */}
-      {isLoading && (
+      {activeTab === 'rodeo' && rodeoError && (
+        <Alert variant="error">
+          {rodeoError}
+          <button type="button" onClick={clearRodeoError} className="ml-2 underline text-xs" aria-label="Cerrar error">
+            Cerrar
+          </button>
+        </Alert>
+      )}
+      {activeTab === 'rodeo' && rodeoSuccess && (
+        <Alert variant="success">{rodeoSuccess}</Alert>
+      )}
+
+      {/* Loading state */}
+      {isCurrentTabLoading && (
         <div className="flex items-center justify-center py-16">
           <Spinner size="lg" />
         </div>
       )}
 
-      {!isLoading && (
+      {/* ---- EVENTOS TAB ---- */}
+      {activeTab === 'eventos' && !eventosLoading && (
         <>
-          {/* Filters */}
           <EventosFilters
             filterTipo={filterTipo as TipoEvento | ''}
             filterFechaDesde={filterFechaDesde}
@@ -185,7 +336,7 @@ export function EventosPage() {
             onTipoChange={setFilterTipo}
             onFechaDesdeChange={setFilterFechaDesde}
             onFechaHastaChange={setFilterFechaHasta}
-            onClear={clearFilters}
+            onClear={clearEventosFilters}
           />
 
           {/* F-016: Cost summary bar — visible only when there are actual costs */}
@@ -202,12 +353,33 @@ export function EventosPage() {
             </div>
           )}
 
-          {/* Timeline */}
           <EventoTimeline
             eventos={filteredEventos}
-            onEdit={handleOpenEdit}
-            onDelete={handleOpenDelete}
-            onAddClick={handleOpenCreate}
+            onEdit={handleOpenEditEvento}
+            onDelete={handleOpenDeleteEvento}
+            onAddClick={handleOpenCreateEvento}
+          />
+        </>
+      )}
+
+      {/* ---- RODEO TAB ---- */}
+      {activeTab === 'rodeo' && !rodeoLoading && (
+        <>
+          <RodeoFilters
+            filterCategoria={filterCategoria}
+            filterFechaDesde={rodeoFechaDesde}
+            filterFechaHasta={rodeoFechaHasta}
+            onCategoriaChange={setFilterCategoria}
+            onFechaDesdeChange={setRodeoFechaDesde}
+            onFechaHastaChange={setRodeoFechaHasta}
+            onClear={clearRodeoFilters}
+          />
+
+          <RodeoTimeline
+            eventos={filteredEventosRodeo}
+            onEdit={handleOpenEditRodeo}
+            onDelete={handleOpenDeleteRodeo}
+            onAddClick={handleOpenCreateRodeo}
           />
         </>
       )}
@@ -215,8 +387,8 @@ export function EventosPage() {
       {/* Mobile FAB */}
       <button
         type="button"
-        aria-label="Registrar nuevo evento"
-        onClick={handleOpenCreate}
+        aria-label={activeTab === 'rodeo' ? 'Registrar nuevo evento de rodeo' : 'Registrar nuevo evento'}
+        onClick={handleAddClick}
         className="
           sm:hidden
           fixed bottom-24 right-4 z-40
@@ -230,32 +402,57 @@ export function EventosPage() {
         <Plus size={24} />
       </button>
 
-      {/* Form Modal */}
+      {/* ---- EVENTOS MODALS ---- */}
       <EventoFormModal
-        isOpen={isFormOpen}
-        onClose={handleCloseForm}
-        onSubmit={handleFormSubmit}
+        isOpen={isEventoFormOpen}
+        onClose={handleCloseEventoForm}
+        onSubmit={handleEventoFormSubmit}
         evento={editingEvento}
-        isSaving={isSaving}
-        error={error}
-        onClearError={clearError}
+        isSaving={eventosSaving}
+        error={eventosError}
+        onClearError={clearEventosError}
         productos={productos}
       />
 
-      {/* Delete Confirmation */}
       <ConfirmDialog
         isOpen={Boolean(deletingEvento)}
         title="Eliminar evento"
         message={
           deletingEvento
-            ? `¿Estás seguro que querés eliminar este evento de ${deletingEvento.tipo} del ${deletingEvento.fecha}?`
+            ? `Estas seguro que queres eliminar este evento de ${deletingEvento.tipo} del ${deletingEvento.fecha}?`
             : ''
         }
         confirmLabel="Eliminar"
         cancelLabel="Cancelar"
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCancelDelete}
-        isLoading={isSaving}
+        onConfirm={handleConfirmDeleteEvento}
+        onCancel={handleCancelDeleteEvento}
+        isLoading={eventosSaving}
+      />
+
+      {/* ---- RODEO MODALS ---- */}
+      <RodeoFormModal
+        isOpen={isRodeoFormOpen}
+        onClose={handleCloseRodeoForm}
+        onSubmit={handleRodeoFormSubmit}
+        evento={editingEventoRodeo}
+        isSaving={rodeoSaving}
+        error={rodeoError}
+        onClearError={clearRodeoError}
+      />
+
+      <ConfirmDialog
+        isOpen={Boolean(deletingEventoRodeo)}
+        title="Eliminar evento de rodeo"
+        message={
+          deletingEventoRodeo
+            ? `Estas seguro que queres eliminar este evento de ${deletingEventoRodeo.tipo} del ${deletingEventoRodeo.fecha}?`
+            : ''
+        }
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmDeleteRodeo}
+        onCancel={handleCancelDeleteRodeo}
+        isLoading={rodeoSaving}
       />
     </div>
   )
