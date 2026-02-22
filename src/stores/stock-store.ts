@@ -67,8 +67,15 @@ export function getFilteredProductos(state: StockStore): Producto[] {
   })
 }
 
-export function getStockAlerts(state: StockStore): Producto[] {
-  return state.productos.filter(p => p.stockActual <= 10 && p.stockActual >= 0)
+export function getStockAlerts(
+  state: StockStore,
+  thresholds: Record<string, number> = {},
+  defaultThreshold = 10,
+): Producto[] {
+  return state.productos.filter(p => {
+    const umbral = thresholds[p.id] ?? defaultThreshold
+    return p.stockActual <= umbral && p.stockActual >= 0
+  })
 }
 
 export function getMovimientosByProducto(state: StockStore, productoId: string): StockMovimiento[] {

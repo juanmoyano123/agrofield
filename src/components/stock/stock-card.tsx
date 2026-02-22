@@ -1,8 +1,12 @@
+import { useState } from 'react'
+import { Bell } from 'lucide-react'
 import type { Producto } from '../../types'
 
 interface StockCardProps {
   producto: Producto
   maxStock?: number
+  threshold?: number
+  onThresholdChange?: (productoId: string, value: number) => void
 }
 
 const CATEGORIA_LABEL: Record<string, string> = {
@@ -25,14 +29,18 @@ function formatCurrency(value: number): string {
   return value.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
 }
 
-function getStockStatus(stockActual: number): 'ok' | 'low' | 'negative' {
+/**
+ * Determines the visual status of a product's stock level.
+ * Uses a configurable threshold (default 10) for the "low" boundary.
+ */
+function getStockStatus(stockActual: number, threshold = 10): 'ok' | 'low' | 'negative' {
   if (stockActual < 0) return 'negative'
-  if (stockActual <= 10) return 'low'
+  if (stockActual <= threshold) return 'low'
   return 'ok'
 }
 
-export function StockCard({ producto, maxStock }: StockCardProps) {
-  const status = getStockStatus(producto.stockActual)
+export function StockCard({ producto, maxStock, threshold = 10, onThresholdChange }: StockCardProps) {
+  const status = getStockStatus(producto.stockActual, threshold)
   const valorStock = producto.stockActual * producto.precioPromedio
 
   // Progress bar: clamp between 0 and 100
@@ -48,6 +56,28 @@ export function StockCard({ producto, maxStock }: StockCardProps) {
     status === 'negative' ? 'border-l-error' :
     status === 'low'      ? 'border-l-warning' :
                             'border-l-copper'
+
+  // Local state for the threshold inline editor
+  const [showThresholdEdit, setShowThresholdEdit] = useState(false)
+  const [inputValue, setInputValue] = useState(String(threshold))
+
+  function handleBellClick() {
+    setInputValue(String(threshold))
+    setShowThresholdEdit(prev => !prev)
+  }
+
+  function handleThresholdSave() {
+    const parsed = parseInt(inputValue, 10)
+    if (!isNaN(parsed) && parsed >= 0 && onThresholdChange) {
+      onThresholdChange(producto.id, parsed)
+    }
+    setShowThresholdEdit(false)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') handleThresholdSave()
+    if (e.key === 'Escape') setShowThresholdEdit(false)
+  }
 
   return (
     <div className={`
@@ -70,15 +100,60 @@ export function StockCard({ producto, maxStock }: StockCardProps) {
           )}
         </div>
 
-        {status !== 'ok' && (
-          <span className={`
-            shrink-0 text-xs font-bold px-2 py-1 rounded-sm
-            ${status === 'negative' ? 'bg-red-50 text-error' : 'bg-yellow-50 text-warning'}
-          `}>
-            {status === 'negative' ? '⚠ Negativo' : '⚠ Stock bajo'}
-          </span>
-        )}
+        <div className="flex items-center gap-1 shrink-0">
+          {status !== 'ok' && (
+            <span className={`
+              text-xs font-bold px-2 py-1 rounded-sm
+              ${status === 'negative' ? 'bg-red-50 text-error' : 'bg-yellow-50 text-warning'}
+            `}>
+              {status === 'negative' ? '⚠ Negativo' : '⚠ Stock bajo'}
+            </span>
+          )}
+
+          {/* Bell button — toggles the threshold inline editor */}
+          <button
+            type="button"
+            onClick={handleBellClick}
+            aria-label={`Configurar umbral de alerta para ${producto.name}. Umbral actual: ${threshold}`}
+            title={`Umbral de alerta: ${threshold} ${producto.unidad}`}
+            className={`
+              p-1.5 rounded-sm transition-colors duration-200
+              ${showThresholdEdit
+                ? 'text-warning bg-yellow-50'
+                : 'text-text-muted hover:text-warning hover:bg-yellow-50'
+              }
+            `}
+          >
+            <Bell size={14} />
+          </button>
+        </div>
       </div>
+
+      {/* Threshold inline editor — shown when Bell is active */}
+      {showThresholdEdit && (
+        <div className="mb-3 flex items-center gap-2 p-2 bg-[#FBF3E0] border border-warning/30 rounded-sm">
+          <Bell size={12} className="text-warning shrink-0" />
+          <label htmlFor={`threshold-${producto.id}`} className="text-xs text-text-muted whitespace-nowrap">
+            Alertar si stock &le;
+          </label>
+          <input
+            id={`threshold-${producto.id}`}
+            type="number"
+            min={0}
+            value={inputValue}
+            onChange={e => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleThresholdSave}
+            className="
+              w-16 text-xs text-text-primary font-semibold
+              border border-border-warm rounded-sm px-2 py-1
+              bg-surface focus:outline-none focus:border-warning
+            "
+            autoFocus
+          />
+          <span className="text-xs text-text-muted">{producto.unidad}</span>
+        </div>
+      )}
 
       {/* Stock amount */}
       <div className="mb-3">

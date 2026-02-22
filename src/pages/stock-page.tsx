@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/use-auth'
 import { useStock } from '../hooks/use-stock'
 import { StockCard } from '../components/stock/stock-card'
 import { StockFilters } from '../components/stock/stock-filters'
+import { StockAlertsBanner } from '../components/stock/stock-alerts-banner'
 import { Alert } from '../components/ui/alert'
 import { Spinner } from '../components/ui/spinner'
 import { EmptyState } from '../components/ui/empty-state'
@@ -18,7 +19,8 @@ export function StockPage() {
     productos,
     movimientos,
     filteredProductos,
-    stockAlerts,
+    visibleAlerts,
+    thresholds,
     isLoading,
     error,
     filterCategoria,
@@ -27,6 +29,8 @@ export function StockPage() {
     setFilterCategoria,
     setSearchQuery,
     clearError,
+    dismissAlert,
+    setThreshold,
   } = useStock()
 
   useEffect(() => {
@@ -78,21 +82,8 @@ export function StockPage() {
 
       {!isLoading && (
         <>
-          {/* Stock bajo alerts */}
-          {stockAlerts.length > 0 && (
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-sm">
-              <p className="text-sm font-bold text-yellow-700 mb-2">
-                ⚠ {stockAlerts.length} producto{stockAlerts.length > 1 ? 's' : ''} con stock bajo
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {stockAlerts.map(p => (
-                  <span key={p.id} className="text-xs bg-white border border-yellow-200 text-yellow-700 px-2 py-1 rounded-sm font-medium">
-                    {p.name}: {p.stockActual} {p.unidad}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Stock bajo alerts banner — replaces the hardcoded block */}
+          <StockAlertsBanner alerts={visibleAlerts} onDismiss={dismissAlert} />
 
           {/* Filters */}
           {productos.length > 0 && (
@@ -122,7 +113,12 @@ export function StockPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredProductos.map(producto => (
-                <StockCard key={producto.id} producto={producto} />
+                <StockCard
+                  key={producto.id}
+                  producto={producto}
+                  threshold={thresholds[producto.id] ?? 10}
+                  onThresholdChange={setThreshold}
+                />
               ))}
             </div>
           )}

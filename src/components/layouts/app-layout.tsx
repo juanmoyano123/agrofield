@@ -23,6 +23,7 @@ import { SyncPanel } from '../ui/sync-panel'
 import { useOnboarding } from '../../hooks/use-onboarding'
 import { OnboardingOverlay } from '../onboarding/onboarding-overlay'
 import { OnboardingResumeBanner } from '../onboarding/onboarding-resume-banner'
+import { useStockAlertCount } from '../../hooks/use-stock-alert-count'
 
 interface NavItem {
   to: string
@@ -89,6 +90,9 @@ export function AppLayout() {
   // F-012: Get processQueue from useSync for manual sync triggering
   const { processQueue } = useSync()
 
+  // F-018: Count of products currently below their stock threshold
+  const stockAlertCount = useStockAlertCount()
+
   const isOnline = useNetworkStore(s => s.isOnline)
   const syncStatus = useNetworkStore(s => s.syncStatus)
   const pendingCount = useNetworkStore(s => s.pendingCount)
@@ -122,32 +126,44 @@ export function AppLayout() {
         {/* Navigation */}
         <nav className="flex-1 py-5 overflow-y-auto" aria-label="Navegación principal">
           <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/25 px-6 mb-2">Principal</p>
-          {sidebarNavItems.map(item => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-6 py-2.5
-                transition-all duration-300
-                ${isActive
-                  ? 'text-white'
-                  : 'text-[#7A9B80] hover:text-white/90'
-                }
-              `}
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive ? (
-                    <span className="w-1.5 h-1.5 rounded-full bg-field-green shrink-0" />
-                  ) : (
-                    <span className="w-1.5 h-1.5 shrink-0" />
-                  )}
-                  <span className="shrink-0 opacity-60">{item.icon}</span>
-                  <span className="text-sm font-medium tracking-wide">{item.label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
+          {sidebarNavItems.map(item => {
+            // F-018: stock badge — only shown on the Stock nav item when alerts exist
+            const showStockBadge = item.to === '/stock' && stockAlertCount > 0
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) => `
+                  flex items-center gap-3 px-6 py-2.5
+                  transition-all duration-300
+                  ${isActive
+                    ? 'text-white'
+                    : 'text-[#7A9B80] hover:text-white/90'
+                  }
+                `}
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive ? (
+                      <span className="w-1.5 h-1.5 rounded-full bg-field-green shrink-0" />
+                    ) : (
+                      <span className="w-1.5 h-1.5 shrink-0" />
+                    )}
+                    <span className="shrink-0 opacity-60">{item.icon}</span>
+                    <span className="text-sm font-medium tracking-wide flex-1">{item.label}</span>
+                    {showStockBadge && (
+                      <span
+                        className="ml-auto bg-warning text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0"
+                        aria-label={`${stockAlertCount} productos con stock bajo`}
+                      >
+                        {stockAlertCount > 99 ? '99+' : stockAlertCount}
+                      </span>
+                    )}
+                  </>
+                )}
+              </NavLink>
+            )
+          })}
 
           {/* F-012: Pending items badge — shows when there are unsynced changes */}
           {pendingCount > 0 && (
@@ -234,20 +250,34 @@ export function AppLayout() {
         aria-label="Navegación inferior"
         className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-surface border-t border-border-warm flex justify-around items-center z-40"
       >
-        {mobileNavItems.map(item => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) => `
-              flex flex-col items-center justify-center gap-1 flex-1 py-2
-              text-xs font-medium transition-colors duration-300
-              ${isActive ? 'text-field-green' : 'text-text-muted hover:text-text-dim'}
-            `}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+        {mobileNavItems.map(item => {
+          // F-018: stock badge for mobile bottom nav
+          const showStockBadge = item.to === '/stock' && stockAlertCount > 0
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) => `
+                flex flex-col items-center justify-center gap-1 flex-1 py-2
+                text-xs font-medium transition-colors duration-300
+                ${isActive ? 'text-field-green' : 'text-text-muted hover:text-text-dim'}
+              `}
+            >
+              <span className="relative">
+                {item.icon}
+                {showStockBadge && (
+                  <span
+                    className="absolute -top-1 -right-1.5 bg-warning text-white text-[8px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center leading-none"
+                    aria-label={`${stockAlertCount} alertas de stock`}
+                  >
+                    {stockAlertCount > 9 ? '9+' : stockAlertCount}
+                  </span>
+                )}
+              </span>
+              <span>{item.label}</span>
+            </NavLink>
+          )
+        })}
       </nav>
 
       {/* Onboarding overlay — shown on first visit or when manually triggered */}
