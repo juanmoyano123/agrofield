@@ -12,6 +12,9 @@
  *   - Error
  *
  * When everything is normal (online, idle, 0 pending) it renders nothing.
+ *
+ * F-012: The entire component is now wrapped in a button that opens
+ * the sync panel drawer when clicked.
  */
 
 import { useNetworkStore } from '../../stores/network-store'
@@ -20,6 +23,7 @@ export function SyncStatus() {
   const isOnline = useNetworkStore(s => s.isOnline)
   const syncStatus = useNetworkStore(s => s.syncStatus)
   const pendingCount = useNetworkStore(s => s.pendingCount)
+  const toggleSyncPanel = useNetworkStore(s => s.toggleSyncPanel)
 
   // Nothing to show — everything is normal
   if (isOnline && syncStatus === 'idle' && pendingCount === 0) return null
@@ -139,12 +143,16 @@ export function SyncStatus() {
   }
 
   return (
-    <div
-      className={`hidden sm:flex items-center gap-1 text-xs font-medium ${colorClasses}`}
+    // F-012: wrapped in a button to open the sync panel drawer
+    <button
+      type="button"
+      onClick={toggleSyncPanel}
+      className={`hidden sm:flex items-center gap-1 text-xs font-medium ${colorClasses} hover:opacity-80 transition-opacity min-h-[44px] px-1`}
+      aria-label="Abrir panel de sincronizacion"
       aria-live="polite"
     >
       {icon}
       <span>{label}</span>
-    </div>
+    </button>
   )
 }

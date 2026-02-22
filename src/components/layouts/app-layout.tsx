@@ -1,9 +1,25 @@
+/**
+ * AppLayout
+ *
+ * Main authenticated layout:
+ * - Desktop: fixed sidebar + main content area
+ * - Mobile: sticky header + bottom navigation bar
+ *
+ * F-012 additions:
+ * - Badge counter in sidebar showing pendingCount (desktop)
+ * - SyncPanel drawer mounted here, controlled via useNetworkStore
+ * - SyncStatus in mobile header is now clickable (inside sync-status.tsx)
+ * - processQueue from useSync is passed to SyncPanel for manual trigger
+ */
+
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, MapPin, ShoppingCart, Package, Users, LogOut, Hammer, Map } from 'lucide-react'
+import { LayoutDashboard, MapPin, ShoppingCart, Package, Users, LogOut, Hammer, Map, Cloud } from 'lucide-react'
 import { useAuth } from '../../hooks/use-auth'
 import { useNetworkStore } from '../../stores/network-store'
+import { useSync } from '../../hooks/use-sync'
 import { SyncStatus } from '../ui/sync-status'
+import { SyncPanel } from '../ui/sync-panel'
 import { useOnboarding } from '../../hooks/use-onboarding'
 import { OnboardingOverlay } from '../onboarding/onboarding-overlay'
 import { OnboardingResumeBanner } from '../onboarding/onboarding-resume-banner'
@@ -70,9 +86,14 @@ export function AppLayout() {
     if (shouldShow && currentStep === 0) setShowOverlay(true)
   }, [shouldShow, currentStep])
 
+  // F-012: Get processQueue from useSync for manual sync triggering
+  const { processQueue } = useSync()
+
   const isOnline = useNetworkStore(s => s.isOnline)
   const syncStatus = useNetworkStore(s => s.syncStatus)
   const pendingCount = useNetworkStore(s => s.pendingCount)
+  const toggleSyncPanel = useNetworkStore(s => s.toggleSyncPanel)
+
   const isIndicatorVisible = !isOnline || syncStatus !== 'idle' || pendingCount > 0
 
   return (
@@ -99,7 +120,7 @@ export function AppLayout() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-5" aria-label="Navegación principal">
+        <nav className="flex-1 py-5 overflow-y-auto" aria-label="Navegación principal">
           <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/25 px-6 mb-2">Principal</p>
           {sidebarNavItems.map(item => (
             <NavLink
@@ -127,6 +148,35 @@ export function AppLayout() {
               )}
             </NavLink>
           ))}
+
+          {/* F-012: Pending items badge — shows when there are unsynced changes */}
+          {pendingCount > 0 && (
+            <button
+              type="button"
+              onClick={toggleSyncPanel}
+              className="
+                flex items-center gap-2 w-full px-6 py-2.5 mt-1
+                text-sm text-[#7A9B80]
+                hover:text-white hover:bg-sidebar-hover
+                rounded-sm transition-colors duration-300
+              "
+              aria-label={`${pendingCount} cambios pendientes de sincronizar. Abrir panel.`}
+            >
+              {/* Indent to align with nav items */}
+              <span className="w-1.5 h-1.5 shrink-0" aria-hidden="true" />
+              <span className="shrink-0 opacity-60">
+                <Cloud size={20} />
+              </span>
+              <span className="flex-1 text-left">{pendingCount} pendiente{pendingCount !== 1 ? 's' : ''}</span>
+              {/* Badge circle */}
+              <span
+                className="ml-auto bg-warning text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0"
+                aria-hidden="true"
+              >
+                {pendingCount > 99 ? '99+' : pendingCount}
+              </span>
+            </button>
+          )}
         </nav>
 
         {/* User info + logout */}
@@ -162,6 +212,7 @@ export function AppLayout() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {/* SyncStatus is clickable (opens panel) via F-012 changes inside sync-status.tsx */}
           <SyncStatus />
           <button
             type="button"
@@ -216,6 +267,12 @@ export function AppLayout() {
           onDismiss={markSkipped}
         />
       )}
+
+      {/* F-012: Sync panel drawer — mounted at the layout level so it renders above everything */}
+      <SyncPanel
+        onClose={toggleSyncPanel}
+        onSyncNow={processQueue}
+      />
     </div>
   )
 }

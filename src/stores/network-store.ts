@@ -8,9 +8,14 @@
  * Sync status lifecycle:
  *   idle → syncing → success (after 3s) → idle
  *   idle → syncing → error
+ *
+ * F-012 additions:
+ *   - isSyncPanelOpen: controls the sync drawer visibility
+ *   - conflictNotifications: list of auto-resolved conflicts shown in the panel
  */
 
 import { create } from 'zustand'
+import type { ConflictNotification } from '../lib/conflict-resolution'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,6 +43,10 @@ export interface NetworkState {
   syncProgress: SyncProgress | null
   /** Human-readable error from the last failed sync attempt */
   lastSyncError: string | null
+  /** Whether the sync panel drawer is currently open */
+  isSyncPanelOpen: boolean
+  /** List of conflicts that were automatically resolved (last-write-wins) */
+  conflictNotifications: ConflictNotification[]
 }
 
 interface NetworkActions {
@@ -46,6 +55,12 @@ interface NetworkActions {
   setPendingCount: (count: number) => void
   setSyncProgress: (progress: SyncProgress | null) => void
   setLastSyncError: (error: string | null) => void
+  /** Toggle the sync panel drawer open/closed */
+  toggleSyncPanel: () => void
+  /** Add a conflict notification to the list */
+  addConflictNotification: (notification: ConflictNotification) => void
+  /** Clear all conflict notifications (e.g., when panel is closed) */
+  clearConflictNotifications: () => void
 }
 
 type NetworkStore = NetworkState & NetworkActions
@@ -61,6 +76,8 @@ export const useNetworkStore = create<NetworkStore>()((set) => ({
   pendingCount: 0,
   syncProgress: null,
   lastSyncError: null,
+  isSyncPanelOpen: false,
+  conflictNotifications: [],
 
   // Actions
   setOnline: (isOnline) => set({ isOnline }),
@@ -68,4 +85,10 @@ export const useNetworkStore = create<NetworkStore>()((set) => ({
   setPendingCount: (pendingCount) => set({ pendingCount }),
   setSyncProgress: (syncProgress) => set({ syncProgress }),
   setLastSyncError: (lastSyncError) => set({ lastSyncError }),
+  toggleSyncPanel: () => set((state) => ({ isSyncPanelOpen: !state.isSyncPanelOpen })),
+  addConflictNotification: (notification) =>
+    set((state) => ({
+      conflictNotifications: [...state.conflictNotifications, notification],
+    })),
+  clearConflictNotifications: () => set({ conflictNotifications: [] }),
 }))
