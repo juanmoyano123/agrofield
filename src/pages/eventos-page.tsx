@@ -4,6 +4,7 @@ import { ArrowLeft, Plus } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import { useEventos } from '../hooks/use-eventos'
 import { useLotes } from '../hooks/use-lotes'
+import { useImputacionLote } from '../hooks/use-imputacion'
 import { productosApi } from '../lib/api-client'
 import { EventoTimeline } from '../components/eventos/evento-timeline'
 import { EventosFilters } from '../components/eventos/eventos-filters'
@@ -12,6 +13,8 @@ import { ConfirmDialog } from '../components/ui/confirm-dialog'
 import { Alert } from '../components/ui/alert'
 import { Spinner } from '../components/ui/spinner'
 import { Button } from '../components/ui/button'
+import { CostoResumenBar } from '../components/costos/costo-resumen-bar'
+import { CostoDesglose } from '../components/costos/costo-desglose'
 import type { Evento, Producto, TipoEvento } from '../types'
 import type { EventoFormSchema } from '../lib/validations/evento-schemas'
 
@@ -47,6 +50,10 @@ export function EventosPage() {
   const [deletingEvento, setDeletingEvento] = useState<Evento | null>(null)
 
   const lote = lotes.find(l => l.id === loteId)
+
+  // F-016: Derived cost data for this lote — includes eventos + contratistas
+  const { costo, lineas } = useImputacionLote(loteId ?? '', lote?.hectareas ?? 0)
+  const [isCostoExpanded, setIsCostoExpanded] = useState(false)
 
   // Fetch on mount
   useEffect(() => {
@@ -180,6 +187,20 @@ export function EventosPage() {
             onFechaHastaChange={setFilterFechaHasta}
             onClear={clearFilters}
           />
+
+          {/* F-016: Cost summary bar — visible only when there are actual costs */}
+          {costo.costoTotal > 0 && (
+            <div className="flex flex-col gap-2">
+              <CostoResumenBar
+                costo={costo}
+                isExpanded={isCostoExpanded}
+                onToggle={() => setIsCostoExpanded(prev => !prev)}
+              />
+              {isCostoExpanded && (
+                <CostoDesglose lineas={lineas} variant="full" />
+              )}
+            </div>
+          )}
 
           {/* Timeline */}
           <EventoTimeline

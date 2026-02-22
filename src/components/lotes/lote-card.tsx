@@ -1,5 +1,8 @@
-import { Pencil, Trash2, MapPin } from 'lucide-react'
+import { useState } from 'react'
+import { Pencil, Trash2, MapPin, ChevronDown } from 'lucide-react'
 import { Badge } from '../ui/badge'
+import { useImputacionLote } from '../../hooks/use-imputacion'
+import { CostoDesglose } from '../costos/costo-desglose'
 import type { Lote } from '../../types'
 import type { CostoLote } from '../../lib/imputacion-utils'
 
@@ -31,6 +34,14 @@ const actividadVariant: Record<string, 'success' | 'warning'> = {
 }
 
 export function LoteCard({ lote, onEdit, onDelete, onClick, costoLote }: LoteCardProps) {
+  // F-016: Per-lote cost breakdown with collapsible detail section
+  const { costo, lineas } = useImputacionLote(lote.id, lote.hectareas)
+  const [isDetalleCostoOpen, setIsDetalleCostoOpen] = useState(false)
+
+  // Use the derived costo from imputacion engine (supersedes the costoLote prop
+  // which is kept for backwards compatibility from lotes-page)
+  const costoDisplay = costo.costoTotal > 0 ? costo : costoLote
+
   function handleEdit(e: React.MouseEvent) {
     e.stopPropagation()
     onEdit(lote)
@@ -97,26 +108,51 @@ export function LoteCard({ lote, onEdit, onDelete, onClick, costoLote }: LoteCar
         </div>
       )}
 
-      {/* Costo acumulado — powered by F-005 imputacion engine */}
+      {/* Costo acumulado — powered by F-005/F-016 imputacion engine */}
       <div className="pt-1 border-t border-border-warm">
         <div className="flex items-center gap-6 text-xs text-text-muted mb-2">
           <span>
             Último evento: <span className="text-text-muted">{lote.ultimoEvento ?? '—'}</span>
           </span>
         </div>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-text-muted">Costo acumulado</span>
-          <div className="text-right">
-            <span className="font-semibold text-text-primary">
-              {costoLote ? `$${costoLote.costoTotal.toLocaleString('es-AR', { maximumFractionDigits: 0 })}` : '—'}
-            </span>
-            {costoLote && costoLote.costoPorHa > 0 && (
-              <span className="text-xs text-text-muted block">
-                ${costoLote.costoPorHa.toLocaleString('es-AR', { maximumFractionDigits: 0 })}/ha
+
+        {/* F-016: Clickable cost row that toggles the desglose panel */}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setIsDetalleCostoOpen(prev => !prev) }}
+          className="w-full text-left flex items-center justify-between hover:bg-parchment rounded-sm px-1 -mx-1 py-0.5 transition-colors duration-200"
+          aria-expanded={isDetalleCostoOpen}
+          aria-label="Ver desglose de costos"
+        >
+          <span className="text-sm text-text-muted">Costo acumulado</span>
+          <div className="flex items-center gap-1.5">
+            <div className="text-right">
+              <span className="font-semibold text-text-primary text-sm">
+                {costoDisplay
+                  ? `$${costoDisplay.costoTotal.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`
+                  : '—'}
               </span>
+              {costoDisplay && costoDisplay.costoPorHa > 0 && (
+                <span className="text-xs text-text-muted block">
+                  ${costoDisplay.costoPorHa.toLocaleString('es-AR', { maximumFractionDigits: 0 })}/ha
+                </span>
+              )}
+            </div>
+            {costo.costoTotal > 0 && (
+              <ChevronDown
+                size={14}
+                className={`text-text-muted transition-transform duration-200 shrink-0 ${isDetalleCostoOpen ? 'rotate-180' : ''}`}
+              />
             )}
           </div>
-        </div>
+        </button>
+
+        {/* Expandable cost breakdown — compact variant */}
+        {isDetalleCostoOpen && costo.costoTotal > 0 && (
+          <div className="mt-2">
+            <CostoDesglose lineas={lineas} variant="compact" maxLineas={4} />
+          </div>
+        )}
       </div>
 
       {/* Actions */}
