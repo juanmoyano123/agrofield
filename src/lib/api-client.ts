@@ -1,5 +1,6 @@
 import type { User, AuthTokens, LoginCredentials, RegisterData, ApiResponse, Compra, CompraFormData, NuevoProveedorData, Proveedor, Producto } from '../types'
 import type { Lote, CreateLoteData, UpdateLoteData } from '../types'
+import type { Evento, CreateEventoData, UpdateEventoData } from '../types'
 import { mockLogin, mockRegister, mockRefreshToken } from './mock/auth-mock'
 import { mockGetCompras, mockCreateCompra, mockGetProveedores, mockCreateProveedor, mockGetProductos } from './mock/compras-mock'
 import {
@@ -9,6 +10,12 @@ import {
   mockUpdateLote,
   mockDeleteLote,
 } from './mock/lotes-mock'
+import {
+  mockGetEventosByLote,
+  mockCreateEvento,
+  mockUpdateEvento,
+  mockDeleteEvento,
+} from './mock/eventos-mock'
 import { getTokens } from './token-storage'
 
 const useMock = import.meta.env.VITE_USE_MOCK_API !== 'false'
@@ -124,5 +131,37 @@ export const productosApi = {
     if (useMock) return mockGetProductos(tenantId)
     return fetch(`${import.meta.env.VITE_API_BASE_URL}/productos?tenantId=${tenantId}`)
       .then(r => r.json() as Promise<ApiResponse<Producto[]>>)
+  },
+}
+
+export const eventosApi = {
+  getEventosByLote: (loteId: string, tenantId: string): Promise<ApiResponse<Evento[]>> => {
+    if (useMock) return mockGetEventosByLote(loteId, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/lotes/${loteId}/eventos`, {
+      headers: getAuthHeaders(),
+    }).then(r => r.json() as Promise<ApiResponse<Evento[]>>)
+  },
+  createEvento: (data: CreateEventoData, loteId: string, tenantId: string): Promise<ApiResponse<Evento>> => {
+    if (useMock) return mockCreateEvento(data, loteId, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/lotes/${loteId}/eventos`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ ...data, tenantId }),
+    }).then(r => r.json() as Promise<ApiResponse<Evento>>)
+  },
+  updateEvento: (id: string, data: UpdateEventoData, tenantId: string): Promise<ApiResponse<Evento>> => {
+    if (useMock) return mockUpdateEvento(id, data, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/eventos/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    }).then(r => r.json() as Promise<ApiResponse<Evento>>)
+  },
+  deleteEvento: (id: string, tenantId: string): Promise<ApiResponse<void>> => {
+    if (useMock) return mockDeleteEvento(id, tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/eventos/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    }).then(r => r.json() as Promise<ApiResponse<void>>)
   },
 }

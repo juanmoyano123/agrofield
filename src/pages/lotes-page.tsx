@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Search, SlidersHorizontal, Plus } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import { useLotes } from '../hooks/use-lotes'
@@ -13,6 +14,7 @@ import type { Lote, LoteActividad } from '../types'
 import type { CreateLoteFormData } from '../lib/validations/lote-schemas'
 
 export function LotesPage() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const {
     filteredLotes,
@@ -258,6 +260,7 @@ export function LotesPage() {
                   lote={lote}
                   onEdit={handleOpenEdit}
                   onDelete={handleOpenDelete}
+                  onClick={() => navigate(`/lotes/${lote.id}/eventos`)}
                 />
               ))}
             </div>

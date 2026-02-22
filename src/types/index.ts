@@ -12,3 +12,4 @@ export type {
   CachedCompra,
 } from '../lib/db'
 export type { BeforeInstallPromptEvent } from './pwa'
+export * from './evento'
