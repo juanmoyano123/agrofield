@@ -1,3 +1,4 @@
+import { useShallow } from 'zustand/shallow'
 import { useStockStore, getFilteredProductos, getStockAlerts } from '../stores/stock-store'
 
 export function useStock() {
@@ -12,8 +13,8 @@ export function useStock() {
   const setSearchQuery = useStockStore(s => s.setSearchQuery)
   const clearError = useStockStore(s => s.clearError)
 
-  const filteredProductos = useStockStore(getFilteredProductos)
-  const stockAlerts = useStockStore(getStockAlerts)
+  const filteredProductos = useStockStore(useShallow(getFilteredProductos))
+  const stockAlerts = useStockStore(useShallow(getStockAlerts))
 
   return {
     productos,

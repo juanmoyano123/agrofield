@@ -1,3 +1,4 @@
+import { useShallow } from 'zustand/shallow'
 import { useLotesStore, getFilteredAndSortedLotes } from '../stores/lotes-store'
 
 export function useLotes() {
@@ -21,8 +22,7 @@ export function useLotes() {
   const clearError = useLotesStore(s => s.clearError)
   const clearSuccessMessage = useLotesStore(s => s.clearSuccessMessage)
 
-  // Compute filtered + sorted lotes from current state
-  const filteredLotes = useLotesStore(getFilteredAndSortedLotes)
+  const filteredLotes = useLotesStore(useShallow(getFilteredAndSortedLotes))
 
   return {
     lotes,
