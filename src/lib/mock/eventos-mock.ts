@@ -1,5 +1,6 @@
 import type { Evento, CreateEventoData, UpdateEventoData, ApiResponse, EventoInsumo } from '../../types'
 import { randomDelay } from './delay'
+import { applyStockMovimiento } from './stock-mock'
 
 const DEMO_TENANT_ID = 'tenant-demo-001'
 
@@ -133,6 +134,19 @@ export async function mockCreateEvento(
     createdAt: now,
     updatedAt: now,
   }
+  // Decrement stock for each insumo
+  for (const insumo of insumosWithId) {
+    applyStockMovimiento(
+      insumo.productoId,
+      -insumo.cantidad,
+      'evento',
+      newEvento.id,
+      `${newEvento.tipo.charAt(0).toUpperCase() + newEvento.tipo.slice(1)} — lote`,
+      newEvento.fecha,
+      tenantId,
+    )
+  }
+
   mockEventosDB.push(newEvento)
   return { success: true, data: newEvento }
 }
@@ -158,6 +172,14 @@ export async function mockUpdateEvento(
     costoTotal: computeCostoTotal(insumosWithId, data.costoManual ?? existing.costoManual),
     updatedAt: new Date().toISOString(),
   }
+  // Reverse old insumos stock, apply new
+  for (const insumo of existing.insumos) {
+    applyStockMovimiento(insumo.productoId, insumo.cantidad, 'evento', id, 'Ajuste por edición', updated.fecha, tenantId)
+  }
+  for (const insumo of insumosWithId) {
+    applyStockMovimiento(insumo.productoId, -insumo.cantidad, 'evento', id, 'Ajuste por edición', updated.fecha, tenantId)
+  }
+
   mockEventosDB[index] = updated
   return { success: true, data: updated }
 }

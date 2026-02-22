@@ -1,8 +1,10 @@
-import type { Compra, CompraFormData, CompraItem, NuevoProveedorData, Producto, Proveedor } from '../../types'
+import type { Compra, CompraFormData, CompraItem, NuevoProveedorData, Proveedor } from '../../types'
 import type { ApiResponse } from '../../types'
 import { randomDelay } from './delay'
+import { mockProductosDB, applyStockMovimiento, upsertProducto } from './stock-mock'
 
-// In-memory mutable arrays — filtered by tenantId at query time
+// Re-export for backwards compatibility with api-client.ts
+export { mockGetProductos } from './stock-mock'
 
 const mockProveedores: Proveedor[] = [
   {
@@ -30,42 +32,6 @@ const mockProveedores: Proveedor[] = [
     telefono: '+54 11 55234567',
     email: 'compras@campoverde.com.ar',
     notas: null,
-    createdAt: '2026-01-12T10:00:00.000Z',
-  },
-]
-
-const mockProductos: Producto[] = [
-  {
-    id: 'prod-001',
-    tenantId: 'tenant-demo-001',
-    name: 'Roundup 480',
-    categoria: 'herbicida',
-    unidad: 'Litros',
-    precioPromedio: 4500,
-    stockActual: 200,
-    moneda: 'ARS',
-    createdAt: '2026-01-05T08:00:00.000Z',
-  },
-  {
-    id: 'prod-002',
-    tenantId: 'tenant-demo-001',
-    name: 'Soja DM 4210',
-    categoria: 'semilla',
-    unidad: 'Bolsas',
-    precioPromedio: 18000,
-    stockActual: 50,
-    moneda: 'ARS',
-    createdAt: '2026-01-08T09:30:00.000Z',
-  },
-  {
-    id: 'prod-003',
-    tenantId: 'tenant-demo-001',
-    name: 'Urea granulada',
-    categoria: 'fertilizante',
-    unidad: 'Kilos',
-    precioPromedio: 850,
-    stockActual: 5000,
-    moneda: 'ARS',
     createdAt: '2026-01-12T10:00:00.000Z',
   },
 ]
@@ -179,8 +145,6 @@ const mockCompras: Compra[] = [
   },
 ]
 
-// --- Query functions ---
-
 export async function mockGetCompras(tenantId: string): Promise<ApiResponse<Compra[]>> {
   await randomDelay()
   const result = mockCompras.filter(c => c.tenantId === tenantId)
@@ -193,12 +157,6 @@ export async function mockGetProveedores(tenantId: string): Promise<ApiResponse<
   return { success: true, data: result }
 }
 
-export async function mockGetProductos(tenantId: string): Promise<ApiResponse<Producto[]>> {
-  await randomDelay()
-  const result = mockProductos.filter(p => p.tenantId === tenantId)
-  return { success: true, data: result }
-}
-
 export async function mockCreateCompra(
   data: CompraFormData,
   tenantId: string,
@@ -207,37 +165,29 @@ export async function mockCreateCompra(
   await randomDelay()
 
   const compraId = crypto.randomUUID()
+  const existingProv = mockProveedores.find(p => p.id === resolvedProveedorId)
+  const proveedorName = existingProv ? existingProv.name : data.proveedorName
 
-  // Build items and calculate total
   const items: CompraItem[] = data.items.map((itemData, index) => {
     const subtotal = itemData.cantidad * itemData.precioUnitario
 
-    // Find matching product to update stock — best effort, no error if not found
-    const producto = mockProductos.find(
-      p => p.tenantId === tenantId && p.name.toLowerCase() === itemData.productoName.toLowerCase()
+    // Upsert product in shared DB and apply stock movement
+    const productoId = upsertProducto(
+      itemData.productoName,
+      itemData.unidad,
+      itemData.precioUnitario,
+      data.moneda,
+      tenantId,
     )
-
-    let productoId: string
-    if (producto) {
-      // Update stock in memory
-      producto.stockActual += itemData.cantidad
-      productoId = producto.id
-    } else {
-      // Create a new product entry in memory
-      productoId = crypto.randomUUID()
-      const newProducto: Producto = {
-        id: productoId,
-        tenantId,
-        name: itemData.productoName,
-        categoria: null,
-        unidad: itemData.unidad,
-        precioPromedio: itemData.precioUnitario,
-        stockActual: itemData.cantidad,
-        moneda: data.moneda,
-        createdAt: new Date().toISOString(),
-      }
-      mockProductos.push(newProducto)
-    }
+    applyStockMovimiento(
+      productoId,
+      itemData.cantidad,
+      'compra',
+      compraId,
+      `Compra a ${proveedorName}`,
+      data.fecha,
+      tenantId,
+    )
 
     return {
       id: `item-${compraId}-${index}`,
@@ -252,10 +202,6 @@ export async function mockCreateCompra(
   })
 
   const total = items.reduce((sum, item) => sum + item.subtotal, 0)
-
-  // Resolve proveedor name: use existing if id provided, otherwise use form name
-  const existingProv = mockProveedores.find(p => p.id === resolvedProveedorId)
-  const proveedorName = existingProv ? existingProv.name : data.proveedorName
 
   const newCompra: Compra = {
     id: compraId,
@@ -272,7 +218,6 @@ export async function mockCreateCompra(
   }
 
   mockCompras.push(newCompra)
-
   return { success: true, data: newCompra }
 }
 
@@ -293,6 +238,8 @@ export async function mockCreateProveedor(
   }
 
   mockProveedores.push(newProveedor)
-
   return { success: true, data: newProveedor }
 }
+
+// Legacy export for non-stock consumers
+export { mockProductosDB }

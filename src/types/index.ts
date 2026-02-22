@@ -13,3 +13,4 @@ export type {
 } from '../lib/db'
 export type { BeforeInstallPromptEvent } from './pwa'
 export * from './evento'
+export * from './stock'
