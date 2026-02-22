@@ -1,8 +1,12 @@
+import { useState, useEffect } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { LayoutDashboard, MapPin, ShoppingCart, Package, Users, LogOut } from 'lucide-react'
 import { useAuth } from '../../hooks/use-auth'
 import { useNetworkStore } from '../../stores/network-store'
 import { SyncStatus } from '../ui/sync-status'
+import { useOnboarding } from '../../hooks/use-onboarding'
+import { OnboardingOverlay } from '../onboarding/onboarding-overlay'
+import { OnboardingResumeBanner } from '../onboarding/onboarding-resume-banner'
 
 interface NavItem {
   to: string
@@ -40,6 +44,13 @@ const navItems: NavItem[] = [
 
 export function AppLayout() {
   const { user, logout } = useAuth()
+
+  const { shouldShow, currentStep, markCompleted, markSkipped } = useOnboarding()
+  const [showOverlay, setShowOverlay] = useState(false)
+
+  useEffect(() => {
+    if (shouldShow && currentStep === 0) setShowOverlay(true)
+  }, [shouldShow, currentStep])
 
   const isOnline = useNetworkStore(s => s.isOnline)
   const syncStatus = useNetworkStore(s => s.syncStatus)
@@ -169,6 +180,24 @@ export function AppLayout() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Onboarding overlay — shown on first visit or when manually triggered */}
+      {showOverlay && (
+        <OnboardingOverlay
+          onComplete={() => { markCompleted(); setShowOverlay(false) }}
+          onSkip={() => { markSkipped(); setShowOverlay(false) }}
+          initialStep={currentStep}
+        />
+      )}
+
+      {/* Resume banner — shown when tutorial was partially completed */}
+      {shouldShow && !showOverlay && currentStep > 0 && (
+        <OnboardingResumeBanner
+          currentStep={currentStep}
+          onResume={() => setShowOverlay(true)}
+          onDismiss={markSkipped}
+        />
+      )}
     </div>
   )
 }
