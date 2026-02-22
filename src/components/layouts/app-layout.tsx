@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, MapPin, ShoppingCart, Package, LogOut } from 'lucide-react'
+import { LayoutDashboard, MapPin, ShoppingCart, Package, Users, LogOut } from 'lucide-react'
 import { useAuth } from '../../hooks/use-auth'
 import { useNetworkStore } from '../../stores/network-store'
 import { SyncStatus } from '../ui/sync-status'
@@ -25,6 +25,11 @@ const navItems: NavItem[] = [
     to: '/compras',
     label: 'Compras',
     icon: <ShoppingCart size={20} />,
+  },
+  {
+    to: '/proveedores',
+    label: 'Proveedores',
+    icon: <Users size={20} />,
   },
   {
     to: '/stock',

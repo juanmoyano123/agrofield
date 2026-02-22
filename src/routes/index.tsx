@@ -11,6 +11,7 @@ import { ComprasPage } from '../pages/compras-page'
 import { LotesPage } from '../pages/lotes-page'
 import { EventosPage } from '../pages/eventos-page'
 import { StockPage } from '../pages/stock-page'
+import { ProveedoresPage } from '../pages/proveedores-page'
 import { NotFoundPage } from '../pages/not-found-page'
 
 export const router = createBrowserRouter([
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
           { path: '/lotes', element: <LotesPage /> },
           { path: '/lotes/:id/eventos', element: <EventosPage /> },
           { path: '/compras', element: <ComprasPage /> },
+          { path: '/proveedores', element: <ProveedoresPage /> },
           { path: '/stock', element: <StockPage /> },
         ],
       },
