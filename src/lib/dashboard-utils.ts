@@ -1,5 +1,4 @@
-import type { Compra, TrabajoContratista } from '../types'
-import type { Evento } from '../types'
+import type { Compra, TrabajoContratista, Evento, Producto, CategoriaProducto } from '../types'
 import { computeCostosAllLotes } from './imputacion-utils'
 
 export type PeriodOption = 'this-month' | 'last-3' | 'last-6' | 'this-year' | 'all'
@@ -320,4 +319,140 @@ export function computeCostosAllLotesByPeriod(
     .filter(r => r.costoTotal > 0)
     // Highest $/ha first
     .sort((a, b) => b.costoPorHa - a.costoPorHa)
+}
+
+// ---------------------------------------------------------------------------
+// F-015: Evolución de Gastos — stacked AreaChart by product category
+// ---------------------------------------------------------------------------
+
+/** One row per month, breaking down spend by insumo category and contratistas. */
+export interface GastoCategoriaMensual {
+  mes: string          // e.g. "Ene 2026"
+  mesKey: number       // e.g. 202601
+  semilla: number
+  herbicida: number
+  insecticida: number
+  fertilizante: number
+  otro: number         // compras with no category or category 'otro'
+  contratistas: number // trabajos cost in this period (ARS only)
+  total: number
+}
+
+export interface EvolucionGastosSummary {
+  mensual: GastoCategoriaMensual[]
+  promedioMensual: number
+  totalPeriodo: number
+}
+
+/**
+ * Aggregates compras (by product category) and trabajos (contratistas) by month
+ * for the selected period and currency.
+ *
+ * Notes:
+ * - Each CompraItem is mapped to its product's categoria via productoMap.
+ * - Productos with null categoria fall into the 'otro' bucket.
+ * - Trabajos are always ARS; they are excluded when moneda = 'USD'.
+ * - Soft-deleted trabajos (deletedAt set) are always excluded.
+ */
+export function computeEvolucionGastos(
+  compras: Compra[],
+  trabajos: TrabajoContratista[],
+  productos: Producto[],
+  periodo: PeriodOption,
+  moneda: 'ARS' | 'USD',
+): EvolucionGastosSummary {
+  const range = getPeriodRange(periodo)
+
+  // Build a fast lookup: productoId -> categoria
+  const productoMap = new Map<string, CategoriaProducto | null>(
+    productos.map(p => [p.id, p.categoria]),
+  )
+
+  // Filter compras: only matching currency + within period
+  const comprasFiltradas = compras.filter(c => {
+    if (c.moneda !== moneda) return false
+    if (!range) return true
+    return (
+      c.fecha >= range.desde.toISOString().slice(0, 10) &&
+      c.fecha <= range.hasta.toISOString().slice(0, 10)
+    )
+  })
+
+  // Trabajos are ARS-only; exclude entirely when viewing USD
+  const trabajosFiltrados =
+    moneda === 'ARS'
+      ? trabajos.filter(t => {
+          if (t.deletedAt) return false
+          if (!range) return true
+          return (
+            t.fecha >= range.desde.toISOString().slice(0, 10) &&
+            t.fecha <= range.hasta.toISOString().slice(0, 10)
+          )
+        })
+      : []
+
+  // Per-month accumulator
+  const byMonth = new Map<number, GastoCategoriaMensual>()
+
+  const getOrCreate = (key: number): GastoCategoriaMensual => {
+    if (!byMonth.has(key)) {
+      byMonth.set(key, {
+        mes: monthKeyToLabel(key),
+        mesKey: key,
+        semilla: 0,
+        herbicida: 0,
+        insecticida: 0,
+        fertilizante: 0,
+        otro: 0,
+        contratistas: 0,
+        total: 0,
+      })
+    }
+    return byMonth.get(key)!
+  }
+
+  // Accumulate compra items by category
+  for (const compra of comprasFiltradas) {
+    const key = parseFechaToMonthKey(compra.fecha)
+    const row = getOrCreate(key)
+
+    for (const item of compra.items) {
+      const cat = productoMap.get(item.productoId) ?? 'otro'
+      const val = item.subtotal
+
+      switch (cat) {
+        case 'semilla':
+          row.semilla += val
+          break
+        case 'herbicida':
+          row.herbicida += val
+          break
+        case 'insecticida':
+          row.insecticida += val
+          break
+        case 'fertilizante':
+          row.fertilizante += val
+          break
+        default:
+          row.otro += val
+      }
+
+      row.total += val
+    }
+  }
+
+  // Accumulate trabajos as contratistas cost
+  for (const t of trabajosFiltrados) {
+    const key = parseFechaToMonthKey(t.fecha)
+    const row = getOrCreate(key)
+    row.contratistas += t.costo
+    row.total += t.costo
+  }
+
+  // Sort chronologically
+  const mensual = Array.from(byMonth.values()).sort((a, b) => a.mesKey - b.mesKey)
+  const totalPeriodo = mensual.reduce((s, m) => s + m.total, 0)
+  const promedioMensual = mensual.length > 0 ? Math.round(totalPeriodo / mensual.length) : 0
+
+  return { mensual, promedioMensual, totalPeriodo }
 }
