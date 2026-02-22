@@ -82,10 +82,10 @@ export function ComprasList({ compras, onAddClick }: ComprasListProps) {
         <div key={group.key} className="flex flex-col gap-3">
           {/* Month header */}
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-neutral-700 uppercase tracking-wide capitalize">
+            <h2 className="text-sm font-bold text-text-dim uppercase tracking-wide capitalize">
               {group.label}
             </h2>
-            <span className="text-sm font-semibold text-neutral-500">
+            <span className="text-sm font-semibold text-text-muted">
               Total ARS: {formatAmount(group.total)}
             </span>
           </div>

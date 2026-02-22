@@ -13,7 +13,7 @@ interface ButtonProps extends ComponentPropsWithRef<'button'> {
 const variants: Record<ButtonVariant, string> = {
   primary: 'bg-field-green text-white hover:bg-field-green-dark active:bg-field-green-darker disabled:bg-neutral-300 disabled:text-neutral-500',
   secondary: 'bg-earth-brown text-white hover:bg-earth-brown-dark active:bg-earth-brown-darker disabled:bg-neutral-300 disabled:text-neutral-500',
-  ghost: 'bg-transparent text-field-green border-2 border-field-green hover:bg-neutral-50 active:bg-neutral-100 disabled:border-neutral-300 disabled:text-neutral-300',
+  ghost: 'bg-transparent text-field-green border-2 border-field-green hover:bg-parchment active:bg-surface disabled:border-neutral-300 disabled:text-neutral-300',
   danger: 'bg-error text-white hover:bg-red-700 active:bg-red-800 disabled:bg-neutral-300 disabled:text-neutral-500',
 }
 
@@ -39,8 +39,8 @@ export function Button({
       aria-busy={isLoading}
       className={`
         inline-flex items-center justify-center gap-2
-        rounded-md font-semibold
-        transition-colors duration-200
+        rounded-sm font-semibold
+        transition-colors duration-300
         cursor-pointer disabled:cursor-not-allowed
         ${variants[variant]}
         ${sizes[size]}

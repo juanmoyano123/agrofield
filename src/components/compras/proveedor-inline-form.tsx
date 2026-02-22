@@ -9,8 +9,8 @@ interface ProveedorInlineFormProps {
 
 export function ProveedorInlineForm({ register, errors }: ProveedorInlineFormProps) {
   return (
-    <div className="flex flex-col gap-3 p-3 bg-neutral-50 rounded-md border border-neutral-200">
-      <p className="text-sm font-semibold text-neutral-700">Datos del nuevo proveedor</p>
+    <div className="flex flex-col gap-3 p-3 bg-parchment rounded-sm border border-border-warm">
+      <p className="text-sm font-semibold text-text-dim">Datos del nuevo proveedor</p>
       <Input
         label="Nombre del proveedor"
         placeholder="Ej: AgroInsumos Córdoba"

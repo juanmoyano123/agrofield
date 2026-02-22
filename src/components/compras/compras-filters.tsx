@@ -45,7 +45,7 @@ export function ComprasFilters({
   ]
 
   return (
-    <div className="flex flex-wrap gap-3 items-end p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+    <div className="flex flex-wrap gap-3 items-end p-4 bg-parchment rounded-sm border border-border-warm">
       <div className="min-w-[180px] flex-1">
         <Select
           label="Proveedor"

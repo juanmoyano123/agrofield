@@ -71,7 +71,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       className="
         fixed inset-0 z-50
         flex items-end sm:items-center justify-center
-        bg-black/50
+        bg-[#1A1714]/40
         animate-fade-in
         p-0 sm:p-4
       "
@@ -81,8 +81,8 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
         tabIndex={-1}
         className={`
           relative w-full ${sizeClasses[size]}
-          bg-white rounded-t-2xl sm:rounded-xl
-          shadow-xl
+          bg-surface rounded-t-xl sm:rounded-sm
+          shadow-warm-lg
           flex flex-col
           max-h-[90vh] sm:max-h-[85vh]
           outline-none
@@ -90,8 +90,8 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 shrink-0">
-          <h2 id="modal-title" className="text-lg font-bold text-neutral-900 font-display">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-warm shrink-0">
+          <h2 id="modal-title" className="text-lg font-bold text-text-primary font-display">
             {title}
           </h2>
           <button
@@ -100,9 +100,9 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
             aria-label="Cerrar modal"
             className="
               w-8 h-8 flex items-center justify-center
-              rounded-md text-neutral-500
-              hover:bg-neutral-100 hover:text-neutral-700
-              transition-colors duration-200
+              rounded-sm text-text-muted
+              hover:bg-parchment hover:text-text-dim
+              transition-colors duration-300
               cursor-pointer
             "
           >

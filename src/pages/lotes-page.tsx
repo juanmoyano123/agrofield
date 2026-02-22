@@ -113,8 +113,8 @@ export function LotesPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 font-display">Lotes</h1>
-          <p className="text-sm text-neutral-500 mt-1">
+          <h1 className="text-2xl font-bold text-text-primary font-display tracking-tight">Lotes</h1>
+          <p className="text-sm text-text-muted mt-1">
             Gestión de lotes y superficies del campo
           </p>
         </div>
@@ -161,7 +161,7 @@ export function LotesPage() {
             <div className="relative flex-1">
               <Search
                 size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"
               />
               <input
                 type="search"
@@ -170,30 +170,30 @@ export function LotesPage() {
                 placeholder="Buscar por nombre o ubicación..."
                 aria-label="Buscar lotes"
                 className="
-                  w-full pl-9 pr-4 py-3 border border-neutral-300 rounded-md
-                  text-base text-neutral-900 placeholder-neutral-500
-                  hover:border-neutral-400
+                  w-full pl-9 pr-4 py-3 border border-border-warm-strong rounded-sm bg-surface
+                  text-base text-text-primary placeholder-text-muted
+                  hover:border-copper-light
                   focus:outline-none focus:ring-2 focus:ring-field-green focus:border-transparent
                   min-h-[44px]
-                  transition-colors duration-200
+                  transition-colors duration-300
                 "
               />
             </div>
 
             {/* Filter by actividad */}
             <div className="flex items-center gap-2">
-              <SlidersHorizontal size={16} className="text-neutral-400 shrink-0" />
+              <SlidersHorizontal size={16} className="text-text-muted shrink-0" />
               <select
                 value={filterActividad}
                 onChange={e => setFilterActividad(e.target.value as LoteActividad | '')}
                 aria-label="Filtrar por actividad"
                 className="
-                  px-3 py-3 border border-neutral-300 rounded-md
-                  text-base text-neutral-900 bg-white
-                  hover:border-neutral-400
+                  px-3 py-3 border border-border-warm-strong rounded-sm bg-surface
+                  text-base text-text-primary
+                  hover:border-copper-light
                   focus:outline-none focus:ring-2 focus:ring-field-green focus:border-transparent
                   min-h-[44px]
-                  transition-colors duration-200
+                  transition-colors duration-300
                 "
               >
                 <option value="">Todas las actividades</option>
@@ -204,16 +204,16 @@ export function LotesPage() {
           </div>
 
           {/* Sort controls */}
-          <div className="flex items-center gap-2 text-sm text-neutral-500">
+          <div className="flex items-center gap-2 text-sm text-text-muted">
             <span>Ordenar por:</span>
             <button
               type="button"
               onClick={() => handleToggleSort('nombre')}
               className={`
-                px-3 py-1 rounded-md transition-colors duration-200 min-h-[36px]
+                px-3 py-1 rounded-sm transition-colors duration-300 min-h-[36px]
                 ${sortField === 'nombre'
                   ? 'bg-field-green text-white'
-                  : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+                  : 'bg-surface hover:bg-parchment text-text-dim border border-border-warm'
                 }
               `}
             >
@@ -223,10 +223,10 @@ export function LotesPage() {
               type="button"
               onClick={() => handleToggleSort('hectareas')}
               className={`
-                px-3 py-1 rounded-md transition-colors duration-200 min-h-[36px]
+                px-3 py-1 rounded-sm transition-colors duration-300 min-h-[36px]
                 ${sortField === 'hectareas'
                   ? 'bg-field-green text-white'
-                  : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+                  : 'bg-surface hover:bg-parchment text-text-dim border border-border-warm'
                 }
               `}
             >
@@ -274,10 +274,10 @@ export function LotesPage() {
           sm:hidden
           fixed bottom-24 right-4 z-40
           w-14 h-14 rounded-full
-          bg-field-green text-white shadow-lg
+          bg-field-green text-white shadow-warm
           flex items-center justify-center
           hover:bg-field-green-dark active:bg-field-green-darker
-          transition-colors duration-200
+          transition-colors duration-300
         "
       >
         <Plus size={24} />

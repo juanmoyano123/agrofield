@@ -79,25 +79,25 @@ export function PwaInstallPrompt() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-neutral-200 shadow-lg p-4 flex items-center gap-3"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border-warm shadow-warm p-4 flex items-center gap-3"
       role="dialog"
       aria-label="Instalar AgroField"
     >
       {/* App icon */}
-      <div className="shrink-0 w-10 h-10 rounded-lg bg-field-green flex items-center justify-center">
+      <div className="shrink-0 w-10 h-10 rounded-sm bg-field-green flex items-center justify-center">
         <span className="text-white font-bold text-sm">AF</span>
       </div>
 
       {/* Text */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-neutral-900">Instalar AgroField</p>
-        <p className="text-xs text-neutral-500 truncate">Acceso rapido desde tu pantalla de inicio</p>
+        <p className="text-sm font-semibold text-text-primary">Instalar AgroField</p>
+        <p className="text-xs text-text-muted truncate">Acceso rapido desde tu pantalla de inicio</p>
       </div>
 
       {/* Install button */}
       <button
         onClick={() => void handleInstall()}
-        className="shrink-0 px-4 py-2 text-sm font-semibold bg-field-green text-white rounded-md hover:bg-field-green-dark transition-colors"
+        className="shrink-0 px-4 py-2 text-sm font-semibold bg-field-green text-white rounded-sm hover:bg-field-green-dark transition-colors duration-300"
         aria-label="Instalar aplicacion"
       >
         Instalar
