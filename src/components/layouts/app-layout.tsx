@@ -24,6 +24,7 @@ import { useOnboarding } from '../../hooks/use-onboarding'
 import { OnboardingOverlay } from '../onboarding/onboarding-overlay'
 import { OnboardingResumeBanner } from '../onboarding/onboarding-resume-banner'
 import { useStockAlertCount } from '../../hooks/use-stock-alert-count'
+import { useFinanceAlertCount } from '../../hooks/use-finance-alert-count'
 
 interface NavItem {
   to: string
@@ -93,6 +94,9 @@ export function AppLayout() {
   // F-018: Count of products currently below their stock threshold
   const stockAlertCount = useStockAlertCount()
 
+  // F-022: Count of active finance alerts
+  const financeAlertCount = useFinanceAlertCount()
+
   const isOnline = useNetworkStore(s => s.isOnline)
   const syncStatus = useNetworkStore(s => s.syncStatus)
   const pendingCount = useNetworkStore(s => s.pendingCount)
@@ -129,6 +133,8 @@ export function AppLayout() {
           {sidebarNavItems.map(item => {
             // F-018: stock badge — only shown on the Stock nav item when alerts exist
             const showStockBadge = item.to === '/stock' && stockAlertCount > 0
+            // F-022: finance badge — only shown on the Dashboard nav item when finance alerts exist
+            const showFinanceBadge = item.to === '/dashboard' && financeAlertCount > 0
             return (
               <NavLink
                 key={item.to}
@@ -157,6 +163,15 @@ export function AppLayout() {
                         aria-label={`${stockAlertCount} productos con stock bajo`}
                       >
                         {stockAlertCount > 99 ? '99+' : stockAlertCount}
+                      </span>
+                    )}
+                    {/* F-022: finance alerts badge on Dashboard nav item */}
+                    {showFinanceBadge && (
+                      <span
+                        className="ml-auto bg-error text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0"
+                        aria-label={`${financeAlertCount} alertas financieras`}
+                      >
+                        {financeAlertCount > 99 ? '99+' : financeAlertCount}
                       </span>
                     )}
                   </>
@@ -253,6 +268,8 @@ export function AppLayout() {
         {mobileNavItems.map(item => {
           // F-018: stock badge for mobile bottom nav
           const showStockBadge = item.to === '/stock' && stockAlertCount > 0
+          // F-022: finance badge for mobile bottom nav on Dashboard item
+          const showFinanceBadge = item.to === '/dashboard' && financeAlertCount > 0
           return (
             <NavLink
               key={item.to}
@@ -271,6 +288,15 @@ export function AppLayout() {
                     aria-label={`${stockAlertCount} alertas de stock`}
                   >
                     {stockAlertCount > 9 ? '9+' : stockAlertCount}
+                  </span>
+                )}
+                {/* F-022: finance badge on Dashboard icon */}
+                {showFinanceBadge && (
+                  <span
+                    className="absolute -top-1 -right-1.5 bg-error text-white text-[8px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center leading-none"
+                    aria-label={`${financeAlertCount} alertas financieras`}
+                  >
+                    {financeAlertCount > 9 ? '9+' : financeAlertCount}
                   </span>
                 )}
               </span>
