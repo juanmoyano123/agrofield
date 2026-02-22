@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
+import { Download } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import { useCompras } from '../hooks/use-compras'
 import { ComprasList } from '../components/compras/compras-list'
@@ -9,6 +10,7 @@ import { Fab } from '../components/ui/fab'
 import { Button } from '../components/ui/button'
 import { Spinner } from '../components/ui/spinner'
 import { Alert } from '../components/ui/alert'
+import { toCsvString, downloadCsv, getCsvFilename } from '../lib/csv-export'
 import type { Compra } from '../types'
 
 export function ComprasPage() {
@@ -49,6 +51,21 @@ export function ComprasPage() {
     })
   }, [compras, filterProveedorId, filterMoneda, filterFechaDesde, filterFechaHasta, filterProducto])
 
+  function handleExportCsv() {
+    if (filteredCompras.length === 0) return
+    const csv = toCsvString(filteredCompras, [
+      { header: 'Fecha', accessor: c => c.fecha },
+      { header: 'Proveedor', accessor: c => c.proveedorName },
+      { header: 'Productos', accessor: c => c.items.map(i => i.productoName).join(', ') },
+      { header: 'Cantidades', accessor: c => c.items.map(i => `${i.cantidad} ${i.unidad}`).join(', ') },
+      { header: 'Total', accessor: c => c.total },
+      { header: 'Moneda', accessor: c => c.moneda },
+      { header: 'Factura', accessor: c => c.numeroFactura ?? '' },
+      { header: 'Notas', accessor: c => c.notas ?? '' },
+    ])
+    downloadCsv(csv, getCsvFilename('compras'))
+  }
+
   function handleClearFilters() {
     setFilterProveedorId('')
     setFilterProducto('')
@@ -76,8 +93,16 @@ export function ComprasPage() {
           </p>
         </div>
 
-        {/* Desktop: button in header */}
-        <div className="hidden sm:block">
+        {/* Desktop: buttons in header */}
+        <div className="hidden sm:flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleExportCsv}
+            disabled={filteredCompras.length === 0}
+          >
+            <Download size={16} /> Exportar CSV
+          </Button>
           <Button
             type="button"
             variant="primary"

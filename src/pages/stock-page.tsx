@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Download } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import { useStock } from '../hooks/use-stock'
 import { StockCard } from '../components/stock/stock-card'
@@ -7,6 +8,8 @@ import { StockAlertsBanner } from '../components/stock/stock-alerts-banner'
 import { Alert } from '../components/ui/alert'
 import { Spinner } from '../components/ui/spinner'
 import { EmptyState } from '../components/ui/empty-state'
+import { Button } from '../components/ui/button'
+import { toCsvString, downloadCsv, getCsvFilename } from '../lib/csv-export'
 import type { CategoriaProducto } from '../types'
 
 function formatCurrency(value: number): string {
@@ -45,6 +48,32 @@ export function StockPage() {
 
   const recentMovimientos = movimientos.slice(0, 10)
 
+  function handleExportInventario() {
+    const csv = toCsvString(filteredProductos, [
+      { header: 'Producto', accessor: p => p.name },
+      { header: 'Categoria', accessor: p => p.categoria ?? '' },
+      { header: 'Stock actual', accessor: p => p.stockActual },
+      { header: 'Unidad', accessor: p => p.unidad },
+      { header: 'Precio promedio', accessor: p => p.precioPromedio },
+      { header: 'Valor total', accessor: p => p.stockActual * p.precioPromedio },
+    ])
+    downloadCsv(csv, getCsvFilename('stock_inventario'))
+  }
+
+  function handleExportMovimientos() {
+    const csv = toCsvString(movimientos, [
+      { header: 'Fecha', accessor: m => m.fecha },
+      { header: 'Producto', accessor: m => m.productoName },
+      { header: 'Tipo', accessor: m => m.tipo },
+      { header: 'Cantidad', accessor: m => m.cantidad },
+      { header: 'Unidad', accessor: m => m.unidad },
+      { header: 'Stock antes', accessor: m => m.stockAntes },
+      { header: 'Stock despues', accessor: m => m.stockDespues },
+      { header: 'Referencia', accessor: m => m.referenciaLabel },
+    ])
+    downloadCsv(csv, getCsvFilename('stock_movimientos'))
+  }
+
   return (
     <div className="flex flex-col gap-6 pb-8">
       {/* Page header */}
@@ -56,11 +85,29 @@ export function StockPage() {
           </p>
         </div>
 
-        {/* Summary chip */}
+        {/* Desktop: summary chip + export buttons */}
         {!isLoading && productos.length > 0 && (
-          <div className="hidden sm:flex flex-col items-end shrink-0">
-            <p className="text-xs text-text-muted uppercase tracking-wide">Valor total</p>
-            <p className="text-lg font-bold text-text-primary">{formatCurrency(valorTotalStock)}</p>
+          <div className="hidden sm:flex items-center gap-3 shrink-0">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleExportMovimientos}
+              disabled={movimientos.length === 0}
+            >
+              <Download size={16} /> Movimientos CSV
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleExportInventario}
+              disabled={filteredProductos.length === 0}
+            >
+              <Download size={16} /> Inventario CSV
+            </Button>
+            <div className="flex flex-col items-end">
+              <p className="text-xs text-text-muted uppercase tracking-wide">Valor total</p>
+              <p className="text-lg font-bold text-text-primary">{formatCurrency(valorTotalStock)}</p>
+            </div>
           </div>
         )}
       </div>

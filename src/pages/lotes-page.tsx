@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, SlidersHorizontal, Plus, Map } from 'lucide-react'
+import { Search, SlidersHorizontal, Plus, Map, Download } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import { useLotes } from '../hooks/use-lotes'
 import { useEventos } from '../hooks/use-eventos'
@@ -13,6 +13,7 @@ import { EmptyState } from '../components/ui/empty-state'
 import { Alert } from '../components/ui/alert'
 import { Spinner } from '../components/ui/spinner'
 import { Button } from '../components/ui/button'
+import { toCsvString, downloadCsv, getCsvFilename } from '../lib/csv-export'
 import type { Lote, LoteActividad } from '../types'
 import type { CreateLoteOutputData } from '../lib/validations/lote-schemas'
 
@@ -107,6 +108,18 @@ export function LotesPage() {
     setDeletingLote(null)
   }
 
+  function handleExportCsv() {
+    const csv = toCsvString(filteredLotes, [
+      { header: 'Nombre', accessor: l => l.nombre },
+      { header: 'Ubicacion', accessor: l => l.ubicacion ?? '' },
+      { header: 'Hectareas', accessor: l => l.hectareas },
+      { header: 'Actividad', accessor: l => l.actividad },
+      { header: 'Latitud', accessor: l => l.latitud ?? '' },
+      { header: 'Longitud', accessor: l => l.longitud ?? '' },
+    ])
+    downloadCsv(csv, getCsvFilename('lotes'))
+  }
+
   function handleToggleSort(field: 'nombre' | 'hectareas') {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
@@ -133,6 +146,10 @@ export function LotesPage() {
         </div>
         {/* Desktop: buttons in header */}
         <div className="hidden sm:flex items-center gap-2">
+          <Button type="button" variant="ghost" onClick={handleExportCsv} disabled={filteredLotes.length === 0}>
+            <Download size={16} />
+            Exportar CSV
+          </Button>
           <Button type="button" variant="ghost" onClick={() => navigate('/mapa')}>
             <Map size={18} />
             Ver mapa

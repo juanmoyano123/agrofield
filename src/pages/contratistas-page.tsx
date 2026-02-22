@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, Download } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import { useContratistas } from '../hooks/use-contratistas'
 import { useLotes } from '../hooks/use-lotes'
@@ -11,6 +11,7 @@ import { EmptyState } from '../components/ui/empty-state'
 import { Alert } from '../components/ui/alert'
 import { Spinner } from '../components/ui/spinner'
 import { Button } from '../components/ui/button'
+import { toCsvString, downloadCsv, getCsvFilename } from '../lib/csv-export'
 import type { TrabajoContratista } from '../types'
 import type { CreateTrabajoFormData } from '../lib/validations/contratista-schemas'
 
@@ -110,6 +111,19 @@ export function ContratistasPage() {
     setDeletingTrabajo(null)
   }
 
+  function handleExportCsv() {
+    const csv = toCsvString(filteredTrabajos, [
+      { header: 'Fecha', accessor: t => t.fecha },
+      { header: 'Tipo', accessor: t => t.tipo },
+      { header: 'Contratista', accessor: t => t.contratistaNombre },
+      { header: 'Lote', accessor: t => t.loteNombre ?? 'Gasto general' },
+      { header: 'Costo', accessor: t => t.costo },
+      { header: 'Estado', accessor: t => t.estado },
+      { header: 'Notas', accessor: t => t.notas ?? '' },
+    ])
+    downloadCsv(csv, getCsvFilename('trabajos'))
+  }
+
   const hasFilters = Boolean(filterContratista || filterLote || filterFechaDesde || filterFechaHasta)
 
   return (
@@ -124,8 +138,12 @@ export function ContratistasPage() {
             Registro de trabajos de contratistas y gastos de campo
           </p>
         </div>
-        {/* Desktop: button in header */}
-        <div className="hidden sm:block">
+        {/* Desktop: buttons in header */}
+        <div className="hidden sm:flex items-center gap-2">
+          <Button type="button" variant="ghost" onClick={handleExportCsv} disabled={filteredTrabajos.length === 0}>
+            <Download size={16} />
+            Exportar CSV
+          </Button>
           <Button type="button" variant="primary" onClick={handleOpenCreate}>
             <Plus size={18} />
             Registrar trabajo

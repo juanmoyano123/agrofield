@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Download } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import { useCompras } from '../hooks/use-compras'
 import { ProveedorCard } from '../components/proveedores/proveedor-card'
@@ -6,7 +7,9 @@ import { ProveedorDetailModal } from '../components/proveedores/proveedor-detail
 import { EmptyState } from '../components/ui/empty-state'
 import { Alert } from '../components/ui/alert'
 import { Spinner } from '../components/ui/spinner'
+import { Button } from '../components/ui/button'
 import { computeProveedorStats } from '../components/proveedores/proveedor-card'
+import { toCsvString, downloadCsv, getCsvFilename } from '../lib/csv-export'
 import type { Proveedor } from '../types'
 
 type SortField = 'nombre' | 'total' | 'compras'
@@ -50,6 +53,17 @@ export function ProveedoresPage() {
     [compras],
   )
 
+  function handleExportCsv() {
+    const csv = toCsvString(filteredProveedores, [
+      { header: 'Nombre', accessor: p => p.name },
+      { header: 'Telefono', accessor: p => p.telefono ?? '' },
+      { header: 'Total compras', accessor: p => computeProveedorStats(compras, p.id).cantidadCompras },
+      { header: 'Total ARS', accessor: p => computeProveedorStats(compras, p.id).totalARS },
+      { header: 'Total USD', accessor: p => computeProveedorStats(compras, p.id).totalUSD },
+    ])
+    downloadCsv(csv, getCsvFilename('proveedores'))
+  }
+
   function sortLabel(field: SortField, label: string) {
     return (
       <button
@@ -83,12 +97,24 @@ export function ProveedoresPage() {
           </p>
         </div>
 
-        {totalGastoARS > 0 && (
-          <div className="hidden sm:flex flex-col items-end shrink-0">
-            <p className="text-xs text-text-muted uppercase tracking-wide">Gasto total ARS</p>
-            <p className="text-lg font-bold text-text-primary">
-              {totalGastoARS.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })}
-            </p>
+        {filteredProveedores.length > 0 && (
+          <div className="hidden sm:flex items-center gap-3 shrink-0">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleExportCsv}
+              disabled={filteredProveedores.length === 0}
+            >
+              <Download size={16} /> Exportar CSV
+            </Button>
+            {totalGastoARS > 0 && (
+              <div className="flex flex-col items-end">
+                <p className="text-xs text-text-muted uppercase tracking-wide">Gasto total ARS</p>
+                <p className="text-lg font-bold text-text-primary">
+                  {totalGastoARS.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })}
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
