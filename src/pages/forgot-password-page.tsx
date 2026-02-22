@@ -28,7 +28,7 @@ export function ForgotPasswordPage() {
     return (
       <div className="flex flex-col gap-6 text-center">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 font-display">Email enviado</h1>
+          <h1 className="text-2xl font-bold text-text-primary font-display tracking-tight">Email enviado</h1>
           <p className="text-sm text-neutral-500 mt-2">
             Si el email existe en nuestro sistema, recibirás un link para restablecer tu contraseña.
           </p>
@@ -44,8 +44,8 @@ export function ForgotPasswordPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900 font-display">Recuperar contraseña</h1>
-        <p className="text-sm text-neutral-500 mt-1">
+        <h1 className="text-2xl font-bold text-text-primary font-display tracking-tight">Recuperar contraseña</h1>
+        <p className="text-sm text-text-muted mt-1">
           Ingresá tu email y te enviaremos un link para restablecer tu contraseña.
         </p>
       </div>
@@ -70,7 +70,7 @@ export function ForgotPasswordPage() {
         </Button>
       </form>
 
-      <Link to="/login" className="text-center text-sm text-neutral-500 hover:text-neutral-700">
+      <Link to="/login" className="text-center text-sm text-text-muted hover:text-text-dim">
         Volver al inicio de sesión
       </Link>
     </div>

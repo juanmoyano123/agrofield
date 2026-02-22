@@ -37,14 +37,14 @@ export function LoteCard({ lote, onEdit, onDelete, onClick }: LoteCardProps) {
       onClick={() => onClick?.(lote)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick?.(lote) }}
       className="
-        bg-white border-l-4 border-l-field-green rounded-lg shadow-sm p-6
-        cursor-pointer hover:shadow-md transition-all duration-200
+        bg-surface border-l-2 border-l-copper rounded-sm shadow-warm-sm p-6
+        cursor-pointer hover:-translate-y-0.5 hover:shadow-warm transition-all duration-300
         flex flex-col gap-3
       "
     >
       {/* Header: nombre + badges */}
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-bold text-neutral-900 font-display text-lg leading-tight">
+        <h3 className="font-bold text-text-primary font-display text-lg leading-tight">
           {lote.nombre}
         </h3>
         <Badge variant={actividadVariant[lote.actividad]}>
@@ -53,26 +53,26 @@ export function LoteCard({ lote, onEdit, onDelete, onClick }: LoteCardProps) {
       </div>
 
       {/* Superficie */}
-      <div className="flex items-center gap-4 text-sm text-neutral-600">
+      <div className="flex items-center gap-4 text-sm text-text-dim">
         <span>
-          <span className="font-semibold text-neutral-900">{lote.hectareas.toLocaleString('es-AR')}</span>
+          <span className="font-semibold text-text-primary">{lote.hectareas.toLocaleString('es-AR')}</span>
           {' '}ha
         </span>
         {lote.ubicacion && (
           <span className="flex items-center gap-1 truncate">
-            <MapPin size={14} className="shrink-0 text-neutral-400" />
+            <MapPin size={14} className="shrink-0 text-text-muted" />
             <span className="truncate">{lote.ubicacion}</span>
           </span>
         )}
       </div>
 
       {/* Placeholders */}
-      <div className="flex items-center gap-6 text-xs text-neutral-500 pt-1 border-t border-neutral-100">
+      <div className="flex items-center gap-6 text-xs text-text-muted pt-1 border-t border-border-warm">
         <span>
-          Último evento: <span className="text-neutral-400">{lote.ultimoEvento ?? '—'}</span>
+          Último evento: <span className="text-text-muted">{lote.ultimoEvento ?? '—'}</span>
         </span>
         <span>
-          Costo acumulado: <span className="text-neutral-400">—</span>
+          Costo acumulado: <span className="text-text-muted">—</span>
         </span>
       </div>
 
@@ -84,9 +84,9 @@ export function LoteCard({ lote, onEdit, onDelete, onClick }: LoteCardProps) {
           onClick={handleEdit}
           className="
             min-h-[44px] min-w-[44px] flex items-center justify-center
-            rounded-md text-neutral-500
-            hover:bg-neutral-100 hover:text-field-green
-            transition-colors duration-200
+            rounded-sm text-text-muted
+            hover:bg-parchment hover:text-field-green
+            transition-colors duration-300
           "
         >
           <Pencil size={16} />
@@ -97,9 +97,9 @@ export function LoteCard({ lote, onEdit, onDelete, onClick }: LoteCardProps) {
           onClick={handleDelete}
           className="
             min-h-[44px] min-w-[44px] flex items-center justify-center
-            rounded-md text-neutral-500
-            hover:bg-red-50 hover:text-error
-            transition-colors duration-200
+            rounded-sm text-text-muted
+            hover:bg-[#FAEAE8] hover:text-error
+            transition-colors duration-300
           "
         >
           <Trash2 size={16} />

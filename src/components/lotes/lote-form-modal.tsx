@@ -140,7 +140,7 @@ export function LoteFormModal({ isOpen, onClose, onSubmit, lote, isSaving }: Lot
         </div>
 
         {/* Footer actions */}
-        <div className="flex gap-3 justify-end pt-2 border-t border-neutral-200 mt-2">
+        <div className="flex gap-3 justify-end pt-2 border-t border-border-warm mt-2">
           <Button type="button" variant="ghost" onClick={handleClose} disabled={isSaving}>
             Cancelar
           </Button>

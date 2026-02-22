@@ -40,8 +40,8 @@ export function LoginPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900 font-display">Iniciar sesión</h1>
-        <p className="text-sm text-neutral-500 mt-1">Ingresá con tu cuenta de AgroField</p>
+        <h1 className="text-2xl font-bold text-text-primary font-display tracking-tight">Iniciar sesión</h1>
+        <p className="text-sm text-text-muted mt-1">Ingresá con tu cuenta de AgroField</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
@@ -76,13 +76,13 @@ export function LoginPage() {
       </form>
 
       <div className="flex flex-col gap-2 text-center text-sm">
-        <p className="text-neutral-600">
+        <p className="text-text-dim">
           ¿No tenés cuenta?{' '}
           <Link to="/registro" className="text-field-green font-semibold hover:underline">
             Registrate acá
           </Link>
         </p>
-        <Link to="/recuperar-contrasena" className="text-neutral-500 hover:text-neutral-700">
+        <Link to="/recuperar-contrasena" className="text-text-muted hover:text-text-dim">
           ¿Olvidaste tu contraseña?
         </Link>
       </div>

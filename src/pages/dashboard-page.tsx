@@ -6,18 +6,18 @@ export function DashboardPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold font-display text-neutral-900">
+        <h1 className="text-3xl font-bold font-display text-text-primary tracking-tight">
           Bienvenido, {user?.name ?? 'usuario'}
         </h1>
         {user?.tenantName && (
-          <p className="text-neutral-500 mt-1">{user.tenantName}</p>
+          <p className="text-text-muted mt-1">{user.tenantName}</p>
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-8 text-center">
+      <div className="bg-surface rounded-sm border border-border-warm shadow-warm-sm p-8 text-center">
         <div className="text-6xl mb-4">🌾</div>
-        <h2 className="text-xl font-semibold text-neutral-700 mb-2">Dashboard en construcción</h2>
-        <p className="text-neutral-500 text-sm">
+        <h2 className="text-xl font-semibold text-text-dim mb-2">Dashboard en construcción</h2>
+        <p className="text-text-muted text-sm">
           Las funcionalidades del dashboard estarán disponibles próximamente.
         </p>
       </div>

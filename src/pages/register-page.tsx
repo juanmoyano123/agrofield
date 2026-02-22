@@ -38,8 +38,8 @@ export function RegisterPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900 font-display">Crear cuenta</h1>
-        <p className="text-sm text-neutral-500 mt-1">Empezá a gestionar tu campo hoy</p>
+        <h1 className="text-2xl font-bold text-text-primary font-display tracking-tight">Crear cuenta</h1>
+        <p className="text-sm text-text-muted mt-1">Empezá a gestionar tu campo hoy</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
@@ -96,7 +96,7 @@ export function RegisterPage() {
         </Button>
       </form>
 
-      <p className="text-center text-sm text-neutral-600">
+      <p className="text-center text-sm text-text-dim">
         ¿Ya tenés cuenta?{' '}
         <Link to="/login" className="text-field-green font-semibold hover:underline">
           Iniciá sesión

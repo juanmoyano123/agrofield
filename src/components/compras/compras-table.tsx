@@ -47,27 +47,27 @@ export function ComprasTable({ compras, onAddClick }: ComprasTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-neutral-200">
+    <div className="overflow-x-auto rounded-sm border border-border-warm">
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="bg-neutral-50 border-b border-neutral-200">
-            <th className="text-left px-4 py-3 font-semibold text-neutral-700">
+          <tr className="bg-parchment border-b border-border-warm">
+            <th className="text-left px-4 py-3 font-semibold text-text-dim">
               <button
                 type="button"
                 onClick={toggleSort}
                 className="flex items-center gap-1 hover:text-field-green transition-colors"
               >
                 Fecha
-                <span className="text-neutral-400 text-xs">
+                <span className="text-text-muted text-xs">
                   {sortDir === 'desc' ? '↓' : '↑'}
                 </span>
               </button>
             </th>
-            <th className="text-left px-4 py-3 font-semibold text-neutral-700">Proveedor</th>
-            <th className="text-left px-4 py-3 font-semibold text-neutral-700">Productos</th>
-            <th className="text-right px-4 py-3 font-semibold text-neutral-700">Total</th>
-            <th className="text-center px-4 py-3 font-semibold text-neutral-700">Moneda</th>
-            <th className="text-left px-4 py-3 font-semibold text-neutral-700">Factura</th>
+            <th className="text-left px-4 py-3 font-semibold text-text-dim">Proveedor</th>
+            <th className="text-left px-4 py-3 font-semibold text-text-dim">Productos</th>
+            <th className="text-right px-4 py-3 font-semibold text-text-dim">Total</th>
+            <th className="text-center px-4 py-3 font-semibold text-text-dim">Moneda</th>
+            <th className="text-left px-4 py-3 font-semibold text-text-dim">Factura</th>
           </tr>
         </thead>
         <tbody>
@@ -79,21 +79,21 @@ export function ComprasTable({ compras, onAddClick }: ComprasTableProps) {
               <tr
                 key={compra.id}
                 className={`
-                  border-b border-neutral-100 last:border-0
-                  hover:bg-neutral-50 transition-colors
-                  ${isEven ? 'bg-white' : 'bg-neutral-50/50'}
+                  border-b border-border-warm last:border-0
+                  hover:bg-parchment transition-colors
+                  ${isEven ? 'bg-surface' : 'bg-parchment/50'}
                 `}
               >
-                <td className="px-4 py-3 text-neutral-700 whitespace-nowrap">
+                <td className="px-4 py-3 text-text-dim whitespace-nowrap">
                   {formatDate(compra.fecha)}
                 </td>
-                <td className="px-4 py-3 font-medium text-neutral-900">
+                <td className="px-4 py-3 font-medium text-text-primary">
                   {compra.proveedorName}
                 </td>
-                <td className="px-4 py-3 text-neutral-600 max-w-[240px] truncate" title={productosText}>
+                <td className="px-4 py-3 text-text-dim max-w-[240px] truncate" title={productosText}>
                   {productosText}
                 </td>
-                <td className="px-4 py-3 text-right font-semibold text-neutral-900 whitespace-nowrap">
+                <td className="px-4 py-3 text-right font-semibold text-text-primary whitespace-nowrap">
                   {formatAmount(compra.total, compra.moneda)}
                 </td>
                 <td className="px-4 py-3 text-center">
@@ -101,7 +101,7 @@ export function ComprasTable({ compras, onAddClick }: ComprasTableProps) {
                     {compra.moneda}
                   </Badge>
                 </td>
-                <td className="px-4 py-3 text-neutral-500 text-xs">
+                <td className="px-4 py-3 text-text-muted text-xs">
                   {compra.numeroFactura ?? '—'}
                 </td>
               </tr>

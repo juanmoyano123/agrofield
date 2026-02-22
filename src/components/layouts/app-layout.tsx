@@ -31,58 +31,78 @@ const navItems: NavItem[] = [
 export function AppLayout() {
   const { user, logout } = useAuth()
 
-  // Determine if offline indicator is visible to add top padding
   const isOnline = useNetworkStore(s => s.isOnline)
   const syncStatus = useNetworkStore(s => s.syncStatus)
   const pendingCount = useNetworkStore(s => s.pendingCount)
   const isIndicatorVisible = !isOnline || syncStatus !== 'idle' || pendingCount > 0
 
   return (
-    <div className={`min-h-screen bg-neutral-50 ${isIndicatorVisible ? 'pt-8' : ''}`}>
+    <div className={`min-h-screen bg-parchment bg-paper-texture ${isIndicatorVisible ? 'pt-8' : ''}`}>
+
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 bg-earth-brown text-white flex-col z-30">
+      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 bg-sidebar text-white flex-col z-30">
+
         {/* Logo */}
-        <div className="px-6 py-5 border-b border-[#8B6B47]">
-          <span className="font-display font-bold text-xl text-white">AgroField</span>
+        <div className="px-6 py-6 border-b border-sidebar-border">
+          <div className="w-8 h-8 border border-white/15 flex items-center justify-center mb-3">
+            <svg viewBox="0 0 16 16" className="w-4 h-4 fill-none stroke-white/60" strokeWidth="1.2">
+              <path d="M8 1C4.1 1 1 4.1 1 8s3.1 7 7 7 7-3.1 7-7" />
+              <path d="M8 4v4l3 2" />
+              <circle cx="13" cy="3" r="1.5" className="fill-field-green/40 stroke-none" />
+            </svg>
+          </div>
+          <span className="font-display font-semibold text-xl text-white tracking-wide block">AgroField</span>
           {user?.tenantName && (
-            <p className="text-[#C9A97A] text-xs mt-0.5 truncate">{user.tenantName}</p>
+            <p className="text-text-muted text-xs mt-0.5 truncate tracking-wider uppercase" style={{ letterSpacing: '0.18em' }}>
+              {user.tenantName}
+            </p>
           )}
         </div>
 
-        {/* Navigation links */}
-        <nav className="flex-1 py-4" aria-label="Navegación principal">
+        {/* Navigation */}
+        <nav className="flex-1 py-5" aria-label="Navegación principal">
+          <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/25 px-6 mb-2">Principal</p>
           {navItems.map(item => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3
-                border-l-4 transition-colors duration-200
+                flex items-center gap-3 px-6 py-2.5
+                transition-all duration-300
                 ${isActive
-                  ? 'bg-[#8B6B47] border-l-success text-white'
-                  : 'border-transparent hover:bg-[#8B6B47] hover:border-l-warning text-[#E8D5B7]'
+                  ? 'text-white'
+                  : 'text-[#7A9B80] hover:text-white/90'
                 }
               `}
             >
-              {item.icon}
-              <span className="text-sm font-medium">{item.label}</span>
+              {({ isActive }) => (
+                <>
+                  {isActive ? (
+                    <span className="w-1.5 h-1.5 rounded-full bg-field-green shrink-0" />
+                  ) : (
+                    <span className="w-1.5 h-1.5 shrink-0" />
+                  )}
+                  <span className="shrink-0 opacity-60">{item.icon}</span>
+                  <span className="text-sm font-medium tracking-wide">{item.label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
 
         {/* User info + logout */}
-        <div className="px-4 py-4 border-t border-[#8B6B47]">
+        <div className="px-4 py-4 border-t border-sidebar-border">
           {user && (
-            <p className="text-xs text-[#C9A97A] mb-3 truncate">{user.name}</p>
+            <p className="text-xs text-text-muted mb-2 truncate px-2">{user.name}</p>
           )}
           <button
             type="button"
             onClick={logout}
             className="
               flex items-center gap-2 w-full
-              px-3 py-2 rounded-md text-sm text-[#E8D5B7]
-              hover:bg-[#8B6B47] hover:text-white
-              transition-colors duration-200
+              px-3 py-2 rounded-sm text-sm text-[#7A9B80]
+              hover:bg-sidebar-hover hover:text-white
+              transition-all duration-300
               min-h-[44px]
             "
           >
@@ -93,37 +113,36 @@ export function AppLayout() {
       </aside>
 
       {/* Mobile header */}
-      <header className="md:hidden bg-white border-b border-neutral-200 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+      <header className="md:hidden bg-surface border-b border-border-warm px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-warm-sm">
         <div className="flex items-center gap-2">
-          <span className="font-display font-bold text-lg text-field-green">AgroField</span>
+          <span className="font-display font-semibold text-lg text-field-green">AgroField</span>
           {user?.tenantName && (
-            <span className="text-neutral-400 text-xs hidden sm:inline truncate">
+            <span className="text-text-muted text-xs hidden sm:inline truncate">
               — {user.tenantName}
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
-          {/* Sync status between user name and logout button */}
           <SyncStatus />
           <button
             type="button"
             onClick={logout}
-            className="text-sm text-neutral-600 hover:text-error transition-colors duration-200 min-h-[44px] px-2"
+            className="text-sm text-text-muted hover:text-error transition-colors duration-300 min-h-[44px] px-2"
           >
             Salir
           </button>
         </div>
       </header>
 
-      {/* Main content — offset for sidebar on desktop */}
-      <main className="md:ml-64 p-4 md:p-6 pb-24 md:pb-6">
+      {/* Main content */}
+      <main className="md:ml-64 p-4 md:p-8 pb-24 md:pb-8">
         <Outlet />
       </main>
 
       {/* Mobile Bottom Navigation */}
       <nav
         aria-label="Navegación inferior"
-        className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-neutral-200 flex justify-around items-center z-40"
+        className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-surface border-t border-border-warm flex justify-around items-center z-40"
       >
         {navItems.map(item => (
           <NavLink
@@ -131,8 +150,8 @@ export function AppLayout() {
             to={item.to}
             className={({ isActive }) => `
               flex flex-col items-center justify-center gap-1 flex-1 py-2
-              text-xs font-medium transition-colors duration-200
-              ${isActive ? 'text-field-green' : 'text-neutral-500 hover:text-neutral-700'}
+              text-xs font-medium transition-colors duration-300
+              ${isActive ? 'text-field-green' : 'text-text-muted hover:text-text-dim'}
             `}
           >
             {item.icon}
