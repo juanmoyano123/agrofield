@@ -7,6 +7,8 @@ import { LoginPage } from '../pages/login-page'
 import { RegisterPage } from '../pages/register-page'
 import { ForgotPasswordPage } from '../pages/forgot-password-page'
 import { DashboardPage } from '../pages/dashboard-page'
+import { ComprasPage } from '../pages/compras-page'
+import { LotesPage } from '../pages/lotes-page'
 import { NotFoundPage } from '../pages/not-found-page'
 
 export const router = createBrowserRouter([
@@ -30,6 +32,8 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
+          { path: '/lotes', element: <LotesPage /> },
+          { path: '/compras', element: <ComprasPage /> },
         ],
       },
     ],
