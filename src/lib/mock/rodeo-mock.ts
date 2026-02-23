@@ -17,7 +17,7 @@ function computeCostoTotal(data: {
   return data.costoManual ?? data.cantidadCabezas * (data.precioUnitario ?? 0)
 }
 
-let mockRodeoDB: EventoRodeo[] = [
+const mockRodeoDB: EventoRodeo[] = [
   {
     id: 'rodeo-001',
     tenantId: DEMO_TENANT_ID,

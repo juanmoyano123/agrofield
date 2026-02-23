@@ -19,6 +19,7 @@ export function ForgotPasswordPage() {
     resolver: zodResolver(forgotPasswordSchema),
   })
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSubmit = async (_data: ForgotPasswordFormData) => {
     await new Promise(resolve => setTimeout(resolve, 600))
     setSent(true)

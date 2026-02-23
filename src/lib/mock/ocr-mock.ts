@@ -50,6 +50,7 @@ const MOCK_RESULTS: OcrMockResult[] = [
  * Simulates OCR processing of a document (remito or factura).
  * Waits 1.5–3 seconds to mimic a real API call, then returns a random mock result.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function mockOcrProcess(_file: File): Promise<OcrMockResult> {
   // Realistic delay: 1.5s–3s
   const ms = Math.floor(Math.random() * 1500) + 1500

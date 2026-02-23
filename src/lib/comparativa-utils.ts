@@ -191,6 +191,7 @@ export function buildCategoriasChartData(
               e.fecha <= campana.fechaFin,
           )
           .flatMap(e => e.insumos)
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .filter(_insumo => {
             // Insumos don't carry category directly; we use a convention that
             // the category can be matched from productoName containing the key.

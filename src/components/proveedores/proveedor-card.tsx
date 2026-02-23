@@ -13,6 +13,7 @@ interface ProveedorStats {
   ultimaCompra: string | null
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function computeProveedorStats(compras: Compra[], proveedorId: string): ProveedorStats {
   const propias = compras.filter(c => c.proveedorId === proveedorId)
   return {

@@ -17,7 +17,7 @@ function computeCostoTotal(insumos: EventoInsumo[], costoManual?: number): numbe
   return insumosTotal + (costoManual ?? 0)
 }
 
-let mockEventosDB: Evento[] = [
+const mockEventosDB: Evento[] = [
   {
     id: 'evento-001',
     tenantId: DEMO_TENANT_ID,

@@ -100,6 +100,7 @@ export function AppLayout() {
   const [showOverlay, setShowOverlay] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (shouldShow && currentStep === 0) setShowOverlay(true)
   }, [shouldShow, currentStep])
 

@@ -29,6 +29,7 @@ afterEach(async () => {
 
 // Extend AgroFieldDB to accept custom name for test isolation
 declare module '../db' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface AgroFieldDB {
     // constructor accepts optional name override in tests
   }

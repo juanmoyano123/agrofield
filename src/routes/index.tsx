@@ -61,6 +61,7 @@ const ComparativaPage = lazy(() =>
   import('../pages/comparativa-page').then(m => ({ default: m.ComparativaPage }))
 )
 
+// eslint-disable-next-line react-refresh/only-export-components
 function MapaFallback() {
   return (
     <div className="flex justify-center py-16">

@@ -22,6 +22,7 @@ export const useStockAlertsStore = create<StockAlertsState & StockAlertsActions>
         set(s => ({ thresholds: { ...s.thresholds, [id]: umbral } })),
       removeThreshold: (id) =>
         set(s => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { [id]: _, ...rest } = s.thresholds
           return { thresholds: rest }
         }),

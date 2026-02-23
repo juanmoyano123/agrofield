@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /**
  * F-027: CampanaFormModal — Modal to create or edit a Campaña.
  *

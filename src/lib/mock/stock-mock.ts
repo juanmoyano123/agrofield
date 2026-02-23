@@ -50,7 +50,7 @@ export const mockProductosDB: Producto[] = [
   },
 ]
 
-let mockMovimientosDB: StockMovimiento[] = [
+const mockMovimientosDB: StockMovimiento[] = [
   {
     id: 'mov-001',
     tenantId: 'tenant-demo-001',

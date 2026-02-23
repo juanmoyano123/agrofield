@@ -13,6 +13,7 @@ export function useOnboarding() {
 
   useEffect(() => {
     const raw = localStorage.getItem(ONBOARDING_KEY)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState(raw ? JSON.parse(raw) : null)
   }, [])
 

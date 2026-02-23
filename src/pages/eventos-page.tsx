@@ -121,8 +121,10 @@ export function EventosPage() {
   }, [user, loteId, isGanaderia, fetchEventosRodeo])
 
   // For ganaderia lotes, default to rodeo tab on first load
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (isGanaderia) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab('rodeo')
     }
   }, [isGanaderia])

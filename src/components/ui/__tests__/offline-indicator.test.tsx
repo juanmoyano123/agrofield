@@ -127,7 +127,7 @@ describe('OfflineIndicator — error state', () => {
     })
     render(<OfflineIndicator />)
 
-    expect(screen.getByText(/Error de sincronizacion/i)).toBeInTheDocument()
+    expect(screen.getByText(/Error de sincronizaci[oó]n/i)).toBeInTheDocument()
   })
 
   it('has role=alert when showing error', () => {

@@ -4,7 +4,7 @@ import { randomDelay } from './delay'
 const DEMO_TENANT_ID = 'tenant-demo-001'
 
 // In-memory store for contratistas
-let mockContratistasDB: Contratista[] = [
+const mockContratistasDB: Contratista[] = [
   {
     id: 'contratista-001',
     tenantId: DEMO_TENANT_ID,
@@ -35,7 +35,7 @@ let mockContratistasDB: Contratista[] = [
 ]
 
 // In-memory store for trabajos
-let mockTrabajosDB: TrabajoContratista[] = [
+const mockTrabajosDB: TrabajoContratista[] = [
   {
     id: 'trabajo-001',
     tenantId: DEMO_TENANT_ID,
