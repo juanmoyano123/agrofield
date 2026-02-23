@@ -11,6 +11,8 @@ import { rodeoApi } from '../lib/api-client'
 
 interface RodeoActions {
   fetchEventosRodeo: (loteId: string, tenantId: string) => Promise<void>
+  /** F-026: Fetch all rodeo events for a tenant (cross-lote, for dashboard widget) */
+  fetchAllEventosRodeo: (tenantId: string) => Promise<void>
   createEventoRodeo: (data: CreateEventoRodeoData, loteId: string, tenantId: string) => Promise<void>
   updateEventoRodeo: (id: string, data: UpdateEventoRodeoData, tenantId: string) => Promise<void>
   deleteEventoRodeo: (id: string, tenantId: string) => Promise<void>
@@ -45,6 +47,17 @@ export const useRodeoStore = create<RodeoStore>()(
         const response = await rodeoApi.getEventosRodeoByLote(loteId, tenantId)
         if (!response.success || !response.data) {
           set({ isLoading: false, error: response.error?.message ?? 'Error al cargar los eventos de rodeo' })
+          return
+        }
+        set({ eventos: response.data, isLoading: false })
+      },
+
+      // F-026: Load all rodeo events for the tenant to power the costo por kilo engine
+      fetchAllEventosRodeo: async (tenantId) => {
+        set({ isLoading: true, error: null })
+        const response = await rodeoApi.getAllEventosRodeo(tenantId)
+        if (!response.success || !response.data) {
+          set({ isLoading: false, error: response.error?.message ?? 'Error al cargar eventos de rodeo' })
           return
         }
         set({ eventos: response.data, isLoading: false })

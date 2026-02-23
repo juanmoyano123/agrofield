@@ -11,6 +11,7 @@ export function useRodeo() {
   const filterFechaDesde = useRodeoStore(s => s.filterFechaDesde)
   const filterFechaHasta = useRodeoStore(s => s.filterFechaHasta)
   const fetchEventosRodeo = useRodeoStore(s => s.fetchEventosRodeo)
+  const fetchAllEventosRodeo = useRodeoStore(s => s.fetchAllEventosRodeo)
   const createEventoRodeo = useRodeoStore(s => s.createEventoRodeo)
   const updateEventoRodeo = useRodeoStore(s => s.updateEventoRodeo)
   const deleteEventoRodeo = useRodeoStore(s => s.deleteEventoRodeo)
@@ -34,6 +35,7 @@ export function useRodeo() {
     filterFechaDesde,
     filterFechaHasta,
     fetchEventosRodeo,
+    fetchAllEventosRodeo,
     createEventoRodeo,
     updateEventoRodeo,
     deleteEventoRodeo,

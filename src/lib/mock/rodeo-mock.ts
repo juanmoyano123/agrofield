@@ -191,6 +191,15 @@ export async function mockUpdateEventoRodeo(
   return { success: true, data: updated }
 }
 
+/** F-026: Fetch all EventosRodeo for a tenant (cross-lote, for dashboard widget) */
+export async function mockGetAllEventosRodeo(
+  tenantId: string,
+): Promise<ApiResponse<EventoRodeo[]>> {
+  await randomDelay()
+  const eventos = mockRodeoDB.filter(e => e.tenantId === tenantId && !e.deletedAt)
+  return { success: true, data: eventos }
+}
+
 export async function mockDeleteEventoRodeo(
   id: string,
   tenantId: string,
