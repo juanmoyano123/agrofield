@@ -322,6 +322,62 @@ export function computeCostosAllLotesByPeriod(
 }
 
 // ---------------------------------------------------------------------------
+// F-027: Comparativa entre Campañas — date-range variant of computeCostosAllLotesByPeriod
+// ---------------------------------------------------------------------------
+
+/**
+ * Computes cost-per-lote rows for a custom date range (instead of a PeriodOption).
+ *
+ * Used by the Comparativa feature where date ranges come from user-defined Campañas
+ * rather than a predefined period dropdown. Internally reuses the same aggregation
+ * engine as computeCostosAllLotesByPeriod.
+ *
+ * @param lotes   - Active lotes (id, nombre, hectareas)
+ * @param eventos - All eventos from the store (including deleted)
+ * @param trabajos - All trabajos from the store (including deleted)
+ * @param dateRange - Custom date range {desde: 'YYYY-MM-DD', hasta: 'YYYY-MM-DD'}
+ */
+export function computeCostosAllLotesByDateRange(
+  lotes: Array<{ id: string; nombre: string; hectareas: number }>,
+  eventos: Evento[],
+  trabajos: TrabajoContratista[],
+  dateRange: { desde: string; hasta: string },
+): CostoLoteRow[] {
+  const { desde, hasta } = dateRange
+
+  // Filter eventos by date range and exclude soft-deleted records
+  const eventosFiltrados = eventos.filter(
+    e => !e.deletedAt && e.fecha >= desde && e.fecha <= hasta,
+  )
+
+  // Filter trabajos by date range and exclude soft-deleted records
+  const trabajosFiltrados = trabajos.filter(
+    t => !t.deletedAt && t.fecha >= desde && t.fecha <= hasta,
+  )
+
+  // Delegate to the O(M+K) aggregation engine
+  const costosMap = computeCostosAllLotes(lotes, eventosFiltrados, trabajosFiltrados)
+
+  return lotes
+    .map(lote => {
+      const costo = costosMap.get(lote.id) ?? {
+        loteId: lote.id,
+        costoEventos: 0,
+        costoTrabajos: 0,
+        costoTotal: 0,
+        costoPorHa: 0,
+      }
+      return {
+        ...costo,
+        nombre: lote.nombre,
+        hectareas: lote.hectareas,
+      }
+    })
+    // Include all lotes (even zero cost ones) for complete comparison table
+    .sort((a, b) => b.costoPorHa - a.costoPorHa)
+}
+
+// ---------------------------------------------------------------------------
 // F-015: Evolución de Gastos — stacked AreaChart by product category
 // ---------------------------------------------------------------------------
 
