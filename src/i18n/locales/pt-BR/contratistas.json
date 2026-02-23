@@ -1,0 +1,14 @@
+{
+  "title": "Operações",
+  "subtitle": "Registro de trabalhos de empreiteiros",
+  "newWork": "Novo trabalho",
+  "filters": {
+    "all": "Todos",
+    "pending": "Pendentes",
+    "completed": "Concluídos"
+  },
+  "empty": {
+    "title": "Sem operações",
+    "description": "Registre trabalhos de empreiteiros para controlar as operações."
+  }
+}

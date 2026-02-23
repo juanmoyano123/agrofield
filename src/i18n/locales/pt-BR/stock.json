@@ -1,0 +1,40 @@
+{
+  "title": "Estoque",
+  "subtitle": "Inventário de insumos e materiais",
+  "totalValue": "Valor total",
+  "exportInventario": "Inventário CSV",
+  "exportMovimientos": "Movimentos CSV",
+  "recentMovements": "Movimentos recentes",
+  "csv": {
+    "product": "Produto",
+    "category": "Categoria",
+    "currentStock": "Estoque atual",
+    "unit": "Unidade",
+    "avgPrice": "Preço médio",
+    "totalValue": "Valor total",
+    "date": "Data",
+    "type": "Tipo",
+    "quantity": "Quantidade",
+    "stockBefore": "Estoque antes",
+    "stockAfter": "Estoque depois",
+    "reference": "Referência"
+  },
+  "table": {
+    "date": "Data",
+    "product": "Produto",
+    "movement": "Movimento",
+    "quantity": "Quantidade",
+    "stock": "Estoque"
+  },
+  "empty": {
+    "noStock": {
+      "title": "Sem produtos em estoque",
+      "description": "O estoque é atualizado automaticamente ao registrar compras e eventos de campo."
+    },
+    "noResults": {
+      "title": "Sem resultados",
+      "description": "Nenhum produto corresponde aos filtros atuais."
+    }
+  },
+  "closeError": "Fechar"
+}

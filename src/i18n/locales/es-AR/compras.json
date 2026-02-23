@@ -1,0 +1,30 @@
+{
+  "title": "Compras",
+  "subtitle": "Registro de compras e insumos",
+  "newCompra": "Nueva compra",
+  "exportCsv": "Exportar CSV",
+  "filters": {
+    "proveedor": "Proveedor",
+    "producto": "Producto",
+    "desde": "Desde",
+    "hasta": "Hasta",
+    "moneda": "Moneda",
+    "clearFilters": "Limpiar filtros",
+    "allProveedores": "Todos los proveedores",
+    "allMonedas": "Todas las monedas"
+  },
+  "csv": {
+    "date": "Fecha",
+    "provider": "Proveedor",
+    "products": "Productos",
+    "quantities": "Cantidades",
+    "total": "Total",
+    "currency": "Moneda",
+    "invoice": "Factura",
+    "notes": "Notas"
+  },
+  "empty": {
+    "title": "Sin compras registradas",
+    "description": "Registrá tu primera compra para llevar el control de insumos."
+  }
+}

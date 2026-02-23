@@ -1,0 +1,12 @@
+{
+  "queueItem": {
+    "pending": "Pendiente",
+    "syncing": "Sincronizando",
+    "synced": "Sincronizado",
+    "failed": "Falló",
+    "retry": "Reintentar",
+    "created": "Creado",
+    "updated": "Actualizado",
+    "deleted": "Eliminado"
+  }
+}

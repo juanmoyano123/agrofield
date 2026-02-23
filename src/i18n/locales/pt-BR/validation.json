@@ -1,0 +1,12 @@
+{
+  "required": "Este campo é obrigatório",
+  "email": "E-mail inválido",
+  "minLength": "Mínimo {{count}} caracteres",
+  "maxLength": "Máximo {{count}} caracteres",
+  "min": "O valor mínimo é {{min}}",
+  "max": "O valor máximo é {{max}}",
+  "passwordMismatch": "As senhas não coincidem",
+  "invalidDate": "Data inválida",
+  "invalidNumber": "Número inválido",
+  "positiveNumber": "Deve ser um número positivo"
+}

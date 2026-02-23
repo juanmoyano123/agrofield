@@ -1,0 +1,83 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "lotes": "Lotes",
+    "compras": "Compras",
+    "proveedores": "Fornecedores",
+    "stock": "Estoque",
+    "operaciones": "Operações",
+    "mapa": "Mapa",
+    "principal": "Principal"
+  },
+  "actions": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "retry": "Tentar novamente",
+    "add": "Adicionar",
+    "remove": "Remover",
+    "view": "Ver",
+    "back": "Voltar",
+    "next": "Próximo",
+    "prev": "Anterior",
+    "skip": "Pular",
+    "done": "Pronto",
+    "loading": "Carregando...",
+    "exportCsv": "Exportar CSV"
+  },
+  "status": {
+    "loading": "Carregando...",
+    "saving": "Salvando...",
+    "saved": "Salvo",
+    "error": "Erro",
+    "success": "Sucesso",
+    "noResults": "Sem resultados",
+    "empty": "Sem dados"
+  },
+  "sync": {
+    "offline": "Modo offline",
+    "offlineWithPending_one": "{{count}} alteração pendente",
+    "offlineWithPending_other": "{{count}} alterações pendentes",
+    "syncing": "Sincronizando...",
+    "syncingProgress": "Sincronizando {{current}} de {{total}} registros...",
+    "syncSuccess": "Todos os dados sincronizados",
+    "syncError": "Erro de sincronização",
+    "connected": "Conectado",
+    "disconnected": "Sem conexão",
+    "pending_one": "{{count}} pendente",
+    "pending_other": "{{count}} pendentes",
+    "noPending": "Sem alterações pendentes",
+    "syncNow": "Sincronizar agora",
+    "synchronizing": "Sincronizando…",
+    "lastChanges": "Mostrando as últimas {{count}} alterações",
+    "panelTitle": "Sincronização",
+    "closePanel": "Fechar painel",
+    "allSynced": "Tudo sincronizado",
+    "noChanges": "Sem alterações pendentes"
+  },
+  "auth": {
+    "logout": "Sair",
+    "logoutShort": "Sair"
+  },
+  "sort": {
+    "sortBy": "Ordenar por:",
+    "name": "Nome",
+    "date": "Data",
+    "asc": "Crescente",
+    "desc": "Decrescente"
+  },
+  "language": {
+    "label": "Idioma",
+    "esAR": "Español (Argentina)",
+    "esUY": "Español (Uruguay)",
+    "ptBR": "Português (Brasil)"
+  }
+}

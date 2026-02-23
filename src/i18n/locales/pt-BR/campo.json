@@ -1,0 +1,10 @@
+{
+  "nav": {
+    "lotes": "Lotes",
+    "historial": "Histórico",
+    "ariaLabel": "Navegação de campo"
+  },
+  "ariaLabels": {
+    "logout": "Sair"
+  }
+}

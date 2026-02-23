@@ -1,0 +1,14 @@
+{
+  "title": "Operaciones",
+  "subtitle": "Registro de trabajos de contratistas",
+  "newWork": "Nuevo trabajo",
+  "filters": {
+    "all": "Todos",
+    "pending": "Pendientes",
+    "completed": "Completados"
+  },
+  "empty": {
+    "title": "Sin operaciones",
+    "description": "Registrá trabajos de contratistas para llevar el control de operaciones."
+  }
+}

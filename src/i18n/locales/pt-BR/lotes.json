@@ -1,0 +1,39 @@
+{
+  "title": "Lotes",
+  "subtitle": "Gestão de lotes e áreas da fazenda",
+  "searchPlaceholder": "Buscar por nome ou localização...",
+  "searchLabel": "Buscar lotes",
+  "filterLabel": "Filtrar por atividade",
+  "allActivities": "Todas as atividades",
+  "agriculture": "Agricultura",
+  "livestock": "Pecuária",
+  "sortByName": "Nome",
+  "sortBySurface": "Área",
+  "viewMap": "Ver mapa",
+  "newLote": "Novo lote",
+  "exportCsv": "Exportar CSV",
+  "createFirstLote": "Criar primeiro lote",
+  "empty": {
+    "title": "Sem lotes",
+    "withFilters": "Nenhum lote encontrado com os filtros atuais.",
+    "noFilters": "Crie seu primeiro lote para começar a registrar operações."
+  },
+  "delete": {
+    "title": "Excluir lote",
+    "message": "Tem certeza que deseja excluir \"{{name}}\"? Esta ação não pode ser desfeita.",
+    "confirm": "Excluir",
+    "cancel": "Cancelar"
+  },
+  "ariaLabels": {
+    "createNew": "Criar novo lote",
+    "closeError": "Fechar erro"
+  },
+  "csv": {
+    "name": "Nome",
+    "location": "Localização",
+    "hectares": "Hectares",
+    "activity": "Atividade",
+    "latitude": "Latitude",
+    "longitude": "Longitude"
+  }
+}
