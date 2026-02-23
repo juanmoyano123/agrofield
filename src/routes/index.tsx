@@ -51,6 +51,16 @@ const MapaPage = lazy(() =>
   import('../pages/mapa-page').then(m => ({ default: m.MapaPage }))
 )
 
+// F-028: Lazy-load ReporteBancarioPage to keep initial bundle lean.
+const ReporteBancarioPage = lazy(() =>
+  import('../pages/reporte-bancario-page').then(m => ({ default: m.ReporteBancarioPage }))
+)
+
+// F-027: Lazy-load ComparativaPage (heavier chart components)
+const ComparativaPage = lazy(() =>
+  import('../pages/comparativa-page').then(m => ({ default: m.ComparativaPage }))
+)
+
 function MapaFallback() {
   return (
     <div className="flex justify-center py-16">
@@ -97,6 +107,24 @@ export const router = createBrowserRouter([
                 element: (
                   <Suspense fallback={<MapaFallback />}>
                     <MapaPage />
+                  </Suspense>
+                ),
+              },
+              // F-028: Bank/credit report — only propietario/administrador
+              {
+                path: '/reporte-bancario',
+                element: (
+                  <Suspense fallback={<MapaFallback />}>
+                    <ReporteBancarioPage />
+                  </Suspense>
+                ),
+              },
+              // F-027: Comparativa entre campañas
+              {
+                path: '/comparativa',
+                element: (
+                  <Suspense fallback={<MapaFallback />}>
+                    <ComparativaPage />
                   </Suspense>
                 ),
               },

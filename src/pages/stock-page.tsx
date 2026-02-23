@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { Download } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/use-auth'
+import { useLocale } from '../hooks/use-locale'
 import { useStock } from '../hooks/use-stock'
 import { StockCard } from '../components/stock/stock-card'
 import { StockFilters } from '../components/stock/stock-filters'
@@ -12,11 +14,9 @@ import { Button } from '../components/ui/button'
 import { toCsvString, downloadCsv, getCsvFilename } from '../lib/csv-export'
 import type { CategoriaProducto } from '../types'
 
-function formatCurrency(value: number): string {
-  return value.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
-}
-
 export function StockPage() {
+  const { t } = useTranslation('stock')
+  const { formatCurrency, formatDateShort } = useLocale()
   const { user } = useAuth()
   const {
     productos,
@@ -79,9 +79,9 @@ export function StockPage() {
       {/* Page header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary font-display tracking-tight">Stock</h1>
+          <h1 className="text-2xl font-bold text-text-primary font-display tracking-tight">{t('title')}</h1>
           <p className="text-sm text-text-muted mt-1">
-            Inventario de insumos y materiales
+            {t('subtitle')}
           </p>
         </div>
 
@@ -94,7 +94,7 @@ export function StockPage() {
               onClick={handleExportMovimientos}
               disabled={movimientos.length === 0}
             >
-              <Download size={16} /> Movimientos CSV
+              <Download size={16} /> {t('exportMovimientos')}
             </Button>
             <Button
               type="button"
@@ -102,10 +102,10 @@ export function StockPage() {
               onClick={handleExportInventario}
               disabled={filteredProductos.length === 0}
             >
-              <Download size={16} /> Inventario CSV
+              <Download size={16} /> {t('exportInventario')}
             </Button>
             <div className="flex flex-col items-end">
-              <p className="text-xs text-text-muted uppercase tracking-wide">Valor total</p>
+              <p className="text-xs text-text-muted uppercase tracking-wide">{t('totalValue')}</p>
               <p className="text-lg font-bold text-text-primary">{formatCurrency(valorTotalStock)}</p>
             </div>
           </div>
@@ -116,7 +116,7 @@ export function StockPage() {
       {error && (
         <Alert variant="error">
           {error}
-          <button type="button" onClick={clearError} className="ml-2 underline text-xs">Cerrar</button>
+          <button type="button" onClick={clearError} className="ml-2 underline text-xs">{t('closeError')}</button>
         </Alert>
       )}
 
@@ -146,15 +146,15 @@ export function StockPage() {
           {filteredProductos.length === 0 && productos.length === 0 ? (
             <EmptyState
               icon="📦"
-              title="Sin productos en stock"
-              description="El stock se actualiza automáticamente al registrar compras y eventos de campo."
+              title={t('empty.noStock.title')}
+              description={t('empty.noStock.description')}
               action={undefined}
             />
           ) : filteredProductos.length === 0 ? (
             <EmptyState
               icon="🔍"
-              title="Sin resultados"
-              description="No hay productos que coincidan con los filtros actuales."
+              title={t('empty.noResults.title')}
+              description={t('empty.noResults.description')}
               action={undefined}
             />
           ) : (
@@ -174,17 +174,17 @@ export function StockPage() {
           {recentMovimientos.length > 0 && (
             <div className="flex flex-col gap-3">
               <h2 className="text-sm font-bold text-text-dim uppercase tracking-wide">
-                Movimientos recientes
+                {t('recentMovements')}
               </h2>
               <div className="overflow-x-auto rounded-sm border border-border-warm">
                 <table className="w-full border-collapse text-sm">
                   <thead>
                     <tr className="bg-parchment border-b border-border-warm">
-                      <th className="text-left px-4 py-3 font-semibold text-text-dim">Fecha</th>
-                      <th className="text-left px-4 py-3 font-semibold text-text-dim">Producto</th>
-                      <th className="text-left px-4 py-3 font-semibold text-text-dim">Movimiento</th>
-                      <th className="text-right px-4 py-3 font-semibold text-text-dim">Cantidad</th>
-                      <th className="text-right px-4 py-3 font-semibold text-text-dim">Stock</th>
+                      <th className="text-left px-4 py-3 font-semibold text-text-dim">{t('table.date')}</th>
+                      <th className="text-left px-4 py-3 font-semibold text-text-dim">{t('table.product')}</th>
+                      <th className="text-left px-4 py-3 font-semibold text-text-dim">{t('table.movement')}</th>
+                      <th className="text-right px-4 py-3 font-semibold text-text-dim">{t('table.quantity')}</th>
+                      <th className="text-right px-4 py-3 font-semibold text-text-dim">{t('table.stock')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -196,7 +196,7 @@ export function StockPage() {
                           className={`border-b border-border-warm last:border-0 ${isEven ? 'bg-surface' : 'bg-parchment/50'}`}
                         >
                           <td className="px-4 py-3 text-text-muted whitespace-nowrap text-xs">
-                            {new Date(mov.fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}
+                            {formatDateShort(mov.fecha)}
                           </td>
                           <td className="px-4 py-3 font-medium text-text-primary">{mov.productoName}</td>
                           <td className="px-4 py-3 text-text-dim text-xs truncate max-w-[180px]">{mov.referenciaLabel}</td>

@@ -30,6 +30,7 @@ import {
 } from './mock/contratistas-mock'
 import {
   mockGetEventosRodeoByLote,
+  mockGetAllEventosRodeo,
   mockCreateEventoRodeo,
   mockUpdateEventoRodeo,
   mockDeleteEventoRodeo,
@@ -211,6 +212,13 @@ export const rodeoApi = {
   getEventosRodeoByLote: (loteId: string, tenantId: string): Promise<ApiResponse<EventoRodeo[]>> => {
     if (useMock) return mockGetEventosRodeoByLote(loteId, tenantId)
     return fetch(`${import.meta.env.VITE_API_BASE_URL}/lotes/${loteId}/rodeo`, {
+      headers: getAuthHeaders(),
+    }).then(r => r.json() as Promise<ApiResponse<EventoRodeo[]>>)
+  },
+  /** F-026: Fetch all rodeo events for a tenant (cross-lote, for dashboard widget) */
+  getAllEventosRodeo: (tenantId: string): Promise<ApiResponse<EventoRodeo[]>> => {
+    if (useMock) return mockGetAllEventosRodeo(tenantId)
+    return fetch(`${import.meta.env.VITE_API_BASE_URL}/rodeo?tenantId=${tenantId}`, {
       headers: getAuthHeaders(),
     }).then(r => r.json() as Promise<ApiResponse<EventoRodeo[]>>)
   },

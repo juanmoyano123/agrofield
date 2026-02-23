@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { User, AuthTokens, LoginCredentials, RegisterData, AuthState } from '../types'
+import type { LoginCredentials, RegisterData, AuthState } from '../types'
 import { authApi } from '../lib/api-client'
 import { saveTokens, getTokens, clearTokens, isTokenExpired, isTokenNearExpiry } from '../lib/token-storage'
 

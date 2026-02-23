@@ -14,12 +14,14 @@
 
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, MapPin, ShoppingCart, Package, Users, LogOut, Hammer, Map, Cloud } from 'lucide-react'
+import { LayoutDashboard, MapPin, ShoppingCart, Package, Users, LogOut, Hammer, Map, Cloud, FileText, GitCompareArrows } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../hooks/use-auth'
 import { useNetworkStore } from '../../stores/network-store'
 import { useSync } from '../../hooks/use-sync'
 import { SyncStatus } from '../ui/sync-status'
 import { SyncPanel } from '../ui/sync-panel'
+import { LanguageSelector } from '../ui/language-selector'
 import { useOnboarding } from '../../hooks/use-onboarding'
 import { OnboardingOverlay } from '../onboarding/onboarding-overlay'
 import { OnboardingResumeBanner } from '../onboarding/onboarding-resume-banner'
@@ -66,9 +68,9 @@ const mobileNavItems: NavItem[] = [
   },
 ]
 
-// Desktop sidebar shows all items including Mapa.
-// Mapa is intentionally excluded from the mobile bottom nav to avoid crowding
-// the limited space; users access it from the "Ver mapa" button in Lotes.
+// Desktop sidebar shows all items including Mapa and Reporte.
+// Mapa and Reporte are intentionally excluded from the mobile bottom nav to
+// avoid crowding the limited space.
 const sidebarNavItems: NavItem[] = [
   ...mobileNavItems,
   {
@@ -76,9 +78,22 @@ const sidebarNavItems: NavItem[] = [
     label: 'Mapa',
     icon: <Map size={20} />,
   },
+  // F-028: Bank/credit report — only visible to propietario/administrador
+  {
+    to: '/reporte-bancario',
+    label: 'Reporte',
+    icon: <FileText size={20} />,
+  },
+  // F-027: Comparativa entre campañas
+  {
+    to: '/comparativa',
+    label: 'Comparativa',
+    icon: <GitCompareArrows size={20} />,
+  },
 ]
 
 export function AppLayout() {
+  const { t } = useTranslation('common')
   const { user, logout } = useAuth()
 
   const { shouldShow, currentStep, markCompleted, markSkipped } = useOnboarding()
@@ -128,8 +143,8 @@ export function AppLayout() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-5 overflow-y-auto" aria-label="Navegación principal">
-          <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/25 px-6 mb-2">Principal</p>
+        <nav className="flex-1 py-5 overflow-y-auto" aria-label={t('nav.principal')}>
+          <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/25 px-6 mb-2">{t('nav.principal')}</p>
           {sidebarNavItems.map(item => {
             // F-018: stock badge — only shown on the Stock nav item when alerts exist
             const showStockBadge = item.to === '/stock' && stockAlertCount > 0
@@ -191,14 +206,14 @@ export function AppLayout() {
                 hover:text-white hover:bg-sidebar-hover
                 rounded-sm transition-colors duration-300
               "
-              aria-label={`${pendingCount} cambios pendientes de sincronizar. Abrir panel.`}
+              aria-label={t('sync.pending', { count: pendingCount })}
             >
               {/* Indent to align with nav items */}
               <span className="w-1.5 h-1.5 shrink-0" aria-hidden="true" />
               <span className="shrink-0 opacity-60">
                 <Cloud size={20} />
               </span>
-              <span className="flex-1 text-left">{pendingCount} pendiente{pendingCount !== 1 ? 's' : ''}</span>
+              <span className="flex-1 text-left">{t('sync.pending', { count: pendingCount })}</span>
               {/* Badge circle */}
               <span
                 className="ml-auto bg-warning text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0"
@@ -227,8 +242,12 @@ export function AppLayout() {
             "
           >
             <LogOut size={16} />
-            Cerrar sesión
+            {t('auth.logout')}
           </button>
+          {/* F-030: Language selector in sidebar footer */}
+          <div className="px-2 pt-2 border-t border-sidebar-border/40">
+            <LanguageSelector variant="compact" className="text-[#7A9B80]" />
+          </div>
         </div>
       </aside>
 
@@ -245,12 +264,14 @@ export function AppLayout() {
         <div className="flex items-center gap-2">
           {/* SyncStatus is clickable (opens panel) via F-012 changes inside sync-status.tsx */}
           <SyncStatus />
+          {/* F-030: Language selector compact for mobile header */}
+          <LanguageSelector variant="compact" />
           <button
             type="button"
             onClick={logout}
             className="text-sm text-text-muted hover:text-error transition-colors duration-300 min-h-[44px] px-2"
           >
-            Salir
+            {t('auth.logoutShort')}
           </button>
         </div>
       </header>

@@ -86,7 +86,7 @@ describe('useSync — hook lifecycle', () => {
   })
 
   it('cleans up interval on unmount', () => {
-    const clearIntervalSpy = vi.spyOn(global, 'clearInterval')
+    const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
     const { unmount } = renderHook(() => useSync())
     unmount()
     expect(clearIntervalSpy).toHaveBeenCalled()

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, SlidersHorizontal, Plus, Map, Download } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/use-auth'
 import { useLotes } from '../hooks/use-lotes'
 import { useEventos } from '../hooks/use-eventos'
@@ -18,6 +19,7 @@ import type { Lote, LoteActividad } from '../types'
 import type { CreateLoteOutputData } from '../lib/validations/lote-schemas'
 
 export function LotesPage() {
+  const { t } = useTranslation(['lotes', 'common'])
   const navigate = useNavigate()
   const { user } = useAuth()
   const {
@@ -139,24 +141,24 @@ export function LotesPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary font-display tracking-tight">Lotes</h1>
+          <h1 className="text-2xl font-bold text-text-primary font-display tracking-tight">{t('title')}</h1>
           <p className="text-sm text-text-muted mt-1">
-            Gestión de lotes y superficies del campo
+            {t('subtitle')}
           </p>
         </div>
         {/* Desktop: buttons in header */}
         <div className="hidden sm:flex items-center gap-2">
           <Button type="button" variant="ghost" onClick={handleExportCsv} disabled={filteredLotes.length === 0}>
             <Download size={16} />
-            Exportar CSV
+            {t('exportCsv')}
           </Button>
           <Button type="button" variant="ghost" onClick={() => navigate('/mapa')}>
             <Map size={18} />
-            Ver mapa
+            {t('viewMap')}
           </Button>
           <Button type="button" variant="primary" onClick={handleOpenCreate}>
             <Plus size={18} />
-            Nuevo lote
+            {t('newLote')}
           </Button>
         </div>
       </div>
@@ -201,8 +203,8 @@ export function LotesPage() {
                 type="search"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Buscar por nombre o ubicación..."
-                aria-label="Buscar lotes"
+                placeholder={t('searchPlaceholder')}
+                aria-label={t('searchLabel')}
                 className="
                   w-full pl-9 pr-4 py-3 border border-border-warm-strong rounded-sm bg-surface
                   text-base text-text-primary placeholder-text-muted
@@ -220,7 +222,7 @@ export function LotesPage() {
               <select
                 value={filterActividad}
                 onChange={e => setFilterActividad(e.target.value as LoteActividad | '')}
-                aria-label="Filtrar por actividad"
+                aria-label={t('filterLabel')}
                 className="
                   px-3 py-3 border border-border-warm-strong rounded-sm bg-surface
                   text-base text-text-primary
@@ -230,16 +232,16 @@ export function LotesPage() {
                   transition-colors duration-300
                 "
               >
-                <option value="">Todas las actividades</option>
-                <option value="agricultura">Agricultura</option>
-                <option value="ganaderia">Ganadería</option>
+                <option value="">{t('allActivities')}</option>
+                <option value="agricultura">{t('agriculture')}</option>
+                <option value="ganaderia">{t('livestock')}</option>
               </select>
             </div>
           </div>
 
           {/* Sort controls */}
           <div className="flex items-center gap-2 text-sm text-text-muted">
-            <span>Ordenar por:</span>
+            <span>{t('common:sort.sortBy')}</span>
             <button
               type="button"
               onClick={() => handleToggleSort('nombre')}
@@ -251,7 +253,7 @@ export function LotesPage() {
                 }
               `}
             >
-              Nombre{sortIcon('nombre')}
+              {t('sortByName')}{sortIcon('nombre')}
             </button>
             <button
               type="button"
@@ -264,7 +266,7 @@ export function LotesPage() {
                 }
               `}
             >
-              Superficie{sortIcon('hectareas')}
+              {t('sortBySurface')}{sortIcon('hectareas')}
             </button>
           </div>
 
@@ -272,15 +274,15 @@ export function LotesPage() {
           {filteredLotes.length === 0 ? (
             <EmptyState
               icon="🌾"
-              title="No hay lotes"
+              title={t('empty.title')}
               description={
                 searchQuery || filterActividad
-                  ? 'No se encontraron lotes con los filtros actuales.'
-                  : 'Creá tu primer lote para empezar a registrar operaciones de campo.'
+                  ? t('empty.withFilters')
+                  : t('empty.noFilters')
               }
               action={
                 !searchQuery && !filterActividad
-                  ? { label: 'Crear primer lote', onClick: handleOpenCreate }
+                  ? { label: t('createFirstLote'), onClick: handleOpenCreate }
                   : undefined
               }
             />
@@ -304,7 +306,7 @@ export function LotesPage() {
       {/* Mobile FAB */}
       <button
         type="button"
-        aria-label="Crear nuevo lote"
+        aria-label={t('ariaLabels.createNew')}
         onClick={handleOpenCreate}
         className="
           sm:hidden
@@ -331,14 +333,14 @@ export function LotesPage() {
       {/* Delete confirmation dialog */}
       <ConfirmDialog
         isOpen={Boolean(deletingLote)}
-        title="Eliminar lote"
+        title={t('delete.title')}
         message={
           deletingLote
-            ? `¿Estás seguro que querés eliminar "${deletingLote.nombre}"? Esta acción no se puede deshacer.`
+            ? t('delete.message', { name: deletingLote.nombre })
             : ''
         }
-        confirmLabel="Eliminar"
-        cancelLabel="Cancelar"
+        confirmLabel={t('delete.confirm')}
+        cancelLabel={t('delete.cancel')}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
         isLoading={isSaving}

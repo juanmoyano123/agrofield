@@ -3,7 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { RegisterPage } from '../register-page'
-import { useAuthStore } from '../../stores/auth-store'
 
 vi.mock('../../stores/auth-store', () => {
   const store = {

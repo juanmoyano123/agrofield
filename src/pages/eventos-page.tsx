@@ -19,6 +19,7 @@ import { Spinner } from '../components/ui/spinner'
 import { Button } from '../components/ui/button'
 import { CostoResumenBar } from '../components/costos/costo-resumen-bar'
 import { CostoDesglose } from '../components/costos/costo-desglose'
+import { useCostoKiloLote } from '../hooks/use-costo-kilo'
 import type { Evento, Producto, TipoEvento, EventoRodeo } from '../types'
 import type { EventoFormSchema } from '../lib/validations/evento-schemas'
 import type { CreateEventoRodeoSchema } from '../lib/validations/rodeo-schemas'
@@ -95,6 +96,13 @@ export function EventosPage() {
   // F-016: Derived cost data for this lote — includes eventos + contratistas
   const { costo, lineas } = useImputacionLote(loteId ?? '', lote?.hectareas ?? 0)
   const [isCostoExpanded, setIsCostoExpanded] = useState(false)
+
+  // F-026: Costo por kilo for this lote (only meaningful for ganaderia)
+  const { costoKilo } = useCostoKiloLote(
+    loteId ?? '',
+    lote?.nombre ?? '',
+    lote?.cabezas ?? 0,
+  )
 
   // Fetch on mount: always fetch eventos; fetch rodeo only for ganaderia lotes
   useEffect(() => {
@@ -283,6 +291,7 @@ export function EventosPage() {
             onClick={() => setActiveTab('rodeo')}
             className={`
               px-4 py-2 rounded-sm text-sm font-semibold transition-colors duration-200
+              flex items-center gap-1.5
               ${activeTab === 'rodeo'
                 ? 'bg-[#4A7C59] text-white shadow-warm-sm'
                 : 'text-text-muted hover:text-text-dim'
@@ -290,6 +299,21 @@ export function EventosPage() {
             `}
           >
             Rodeo
+            {/* F-026: $/kg badge — shown when there is enough data to compute */}
+            {isGanaderia && costoKilo.costoPorKg > 0 && (
+              <span
+                title={`Costo por kg: $${costoKilo.costoPorKg.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`}
+                className={`
+                  text-xs font-bold px-1.5 py-0.5 rounded-full
+                  ${activeTab === 'rodeo'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-field-green/10 text-field-green'
+                  }
+                `}
+              >
+                ${Math.round(costoKilo.costoPorKg).toLocaleString('es-AR')}/kg
+              </span>
+            )}
           </button>
         </div>
       )}

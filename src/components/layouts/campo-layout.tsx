@@ -12,10 +12,12 @@
 
 import { NavLink, Outlet } from 'react-router-dom'
 import { MapPin, Clock, LogOut } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../hooks/use-auth'
 import { SyncStatus } from '../ui/sync-status'
 
 export function CampoLayout() {
+  const { t } = useTranslation('campo')
   const { user, logout } = useAuth()
 
   return (
@@ -33,7 +35,7 @@ export function CampoLayout() {
           <button
             type="button"
             onClick={logout}
-            aria-label="Cerrar sesión"
+            aria-label={t('ariaLabels.logout')}
             className="text-white/60 hover:text-white transition-colors min-h-[44px] px-1 flex items-center"
           >
             <LogOut size={18} />
@@ -52,7 +54,7 @@ export function CampoLayout() {
       {/* Bottom navigation — 2 tabs                                          */}
       {/* ------------------------------------------------------------------ */}
       <nav
-        aria-label="Navegación campo"
+        aria-label={t('nav.ariaLabel')}
         className="fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-border-warm flex z-40"
       >
         <NavLink
@@ -65,7 +67,7 @@ export function CampoLayout() {
           }
         >
           <MapPin size={20} />
-          Lotes
+          {t('nav.lotes')}
         </NavLink>
         <NavLink
           to="/campo/historial"
@@ -76,7 +78,7 @@ export function CampoLayout() {
           }
         >
           <Clock size={20} />
-          Historial
+          {t('nav.historial')}
         </NavLink>
       </nav>
     </div>

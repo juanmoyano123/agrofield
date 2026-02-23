@@ -17,6 +17,7 @@
 
 import { useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import { useSyncPanel } from '../../hooks/use-sync-panel'
 import { SyncQueueItemCard } from './sync-queue-item-card'
 
@@ -25,10 +26,11 @@ import { SyncQueueItemCard } from './sync-queue-item-card'
 // ---------------------------------------------------------------------------
 
 function ConnectionIndicator({ isOnline }: { isOnline: boolean }) {
+  const { t } = useTranslation('common')
   return (
     <div className={`flex items-center gap-1.5 text-xs font-medium ${isOnline ? 'text-success' : 'text-warning'}`}>
       <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-success' : 'bg-warning'}`} />
-      {isOnline ? 'Conectado' : 'Sin conexion'}
+      {isOnline ? t('sync.connected') : t('sync.disconnected')}
     </div>
   )
 }
@@ -38,6 +40,7 @@ function ConnectionIndicator({ isOnline }: { isOnline: boolean }) {
 // ---------------------------------------------------------------------------
 
 function EmptyState() {
+  const { t } = useTranslation('common')
   return (
     <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
       {/* Cloud check icon */}
@@ -53,8 +56,8 @@ function EmptyState() {
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75" />
       </svg>
-      <p className="text-sm font-medium text-text-primary">Todo sincronizado</p>
-      <p className="text-xs text-text-muted mt-1">No hay cambios pendientes</p>
+      <p className="text-sm font-medium text-text-primary">{t('sync.allSynced')}</p>
+      <p className="text-xs text-text-muted mt-1">{t('sync.noChanges')}</p>
     </div>
   )
 }
@@ -70,6 +73,7 @@ interface SyncNowButtonProps {
 }
 
 function SyncNowButton({ isOnline, isSyncing, onSync }: SyncNowButtonProps) {
+  const { t } = useTranslation('common')
   return (
     <button
       type="button"
@@ -89,14 +93,14 @@ function SyncNowButton({ isOnline, isSyncing, onSync }: SyncNowButtonProps) {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
-          Sincronizando…
+          {t('sync.synchronizing')}
         </>
       ) : (
         <>
           <svg className="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Sincronizar ahora
+          {t('sync.syncNow')}
         </>
       )}
     </button>
@@ -119,6 +123,7 @@ interface SyncPanelProps {
 // ---------------------------------------------------------------------------
 
 export function SyncPanel({ onClose, onSyncNow }: SyncPanelProps) {
+  const { t } = useTranslation('common')
   const {
     allItems,
     isLoadingItems,
@@ -162,7 +167,7 @@ export function SyncPanel({ onClose, onSyncNow }: SyncPanelProps) {
       className="fixed inset-0 z-50 flex justify-end"
       role="dialog"
       aria-modal="true"
-      aria-label="Panel de sincronizacion"
+      aria-label={t('sync.panelTitle')}
     >
       {/* Semi-transparent backdrop */}
       <div
@@ -196,7 +201,7 @@ export function SyncPanel({ onClose, onSyncNow }: SyncPanelProps) {
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
             </svg>
-            <h2 className="text-sm font-semibold text-text-primary">Sincronizacion</h2>
+            <h2 className="text-sm font-semibold text-text-primary">{t('sync.panelTitle')}</h2>
           </div>
           <button
             type="button"
@@ -207,7 +212,7 @@ export function SyncPanel({ onClose, onSyncNow }: SyncPanelProps) {
               hover:text-text-primary hover:bg-border-warm/30
               transition-colors
             "
-            aria-label="Cerrar panel"
+            aria-label={t('sync.closePanel')}
           >
             <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -219,8 +224,8 @@ export function SyncPanel({ onClose, onSyncNow }: SyncPanelProps) {
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-warm bg-surface/50">
           <p className="text-xs text-text-muted">
             {pendingCount > 0
-              ? `${pendingCount} pendiente${pendingCount !== 1 ? 's' : ''}`
-              : 'Sin cambios pendientes'
+              ? t('sync.pending', { count: pendingCount })
+              : t('sync.noPending')
             }
           </p>
           <SyncNowButton
@@ -257,7 +262,7 @@ export function SyncPanel({ onClose, onSyncNow }: SyncPanelProps) {
           <ConnectionIndicator isOnline={isOnline} />
           {allItems.length > 0 && (
             <p className="text-[10px] text-text-muted">
-              Mostrando los ultimos {allItems.length} cambios
+              {t('sync.lastChanges', { count: allItems.length })}
             </p>
           )}
         </div>

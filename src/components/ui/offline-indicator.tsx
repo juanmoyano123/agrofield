@@ -14,9 +14,11 @@
  *   error    — red bar
  */
 
+import { useTranslation } from 'react-i18next'
 import { useNetworkStore } from '../../stores/network-store'
 
 export function OfflineIndicator() {
+  const { t } = useTranslation('common')
   const isOnline = useNetworkStore(s => s.isOnline)
   const syncStatus = useNetworkStore(s => s.syncStatus)
   const pendingCount = useNetworkStore(s => s.pendingCount)
@@ -55,8 +57,8 @@ export function OfflineIndicator() {
         </svg>
         <span>
           {syncProgress
-            ? `Sincronizando ${syncProgress.current} de ${syncProgress.total} registros...`
-            : 'Sincronizando...'}
+            ? t('sync.syncingProgress', { current: syncProgress.current, total: syncProgress.total })
+            : t('sync.syncing')}
         </span>
       </div>
     )
@@ -82,7 +84,7 @@ export function OfflineIndicator() {
         >
           <polyline points="20 6 9 17 4 12" />
         </svg>
-        <span>Todos los datos sincronizados</span>
+        <span>{t('sync.syncSuccess')}</span>
       </div>
     )
   }
@@ -108,7 +110,7 @@ export function OfflineIndicator() {
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
-        <span>Error de sincronizacion</span>
+        <span>{t('sync.syncError')}</span>
       </div>
     )
   }
@@ -143,8 +145,9 @@ export function OfflineIndicator() {
         <line x1="12" y1="20" x2="12.01" y2="20" />
       </svg>
       <span>
-        Modo offline
-        {pendingCount > 0 && ` — ${pendingCount} ${pendingCount === 1 ? 'cambio pendiente' : 'cambios pendientes'}`}
+        {pendingCount > 0
+          ? t('sync.offlineWithPending', { count: pendingCount })
+          : t('sync.offline')}
       </span>
     </div>
   )
