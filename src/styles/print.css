@@ -1,0 +1,100 @@
+/**
+ * F-028: Reporte Bancario — Global print styles
+ *
+ * These @media print rules hide all app UI chrome (sidebar, header, bottom nav,
+ * action buttons) and optimize the report content for A4 paper output.
+ *
+ * Imported globally in main.tsx so these rules are always active when the user
+ * triggers the print dialog (Ctrl+P or the "Exportar PDF" button).
+ */
+
+@media print {
+  /* ── Hide app chrome ──────────────────────────────────────────────────── */
+  aside,
+  header,
+  nav[aria-label="Navegación inferior"],
+  .reporte-print-actions,
+  .fab,
+  .sync-panel {
+    display: none !important;
+  }
+
+  /* ── Remove sidebar margin from main content ─────────────────────────── */
+  main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ── Force print-friendly colors ─────────────────────────────────────── */
+  body {
+    background: white !important;
+    color: black !important;
+    font-family: 'Inter', Arial, sans-serif !important;
+    font-size: 12pt !important;
+  }
+
+  /* ── A4 page setup ────────────────────────────────────────────────────── */
+  @page {
+    size: A4;
+    margin: 15mm 20mm;
+  }
+
+  /* ── Page breaks between report sections ─────────────────────────────── */
+  .reporte-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── Repeat table headers on each printed page ────────────────────────── */
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  /* ── Remove decorative shadows ────────────────────────────────────────── */
+  .shadow-warm-sm,
+  .shadow-sm,
+  [class*="shadow"] {
+    box-shadow: none !important;
+  }
+
+  /* ── Ensure links don't show URLs in print ────────────────────────────── */
+  a[href]::after {
+    content: none !important;
+  }
+
+  /* ── Reporte content: full width, clean background ──────────────────── */
+  .reporte-content {
+    width: 100% !important;
+    max-width: none !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  /* ── Table print styles ───────────────────────────────────────────────── */
+  .reporte-table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  .reporte-table th,
+  .reporte-table td {
+    border: 1px solid #d1d5db !important;
+    padding: 6px 8px !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  .reporte-table th {
+    background: #f3f4f6 !important;
+    font-weight: 700 !important;
+  }
+
+  .reporte-table tfoot td {
+    background: #f9fafb !important;
+    font-weight: 700 !important;
+  }
+}
